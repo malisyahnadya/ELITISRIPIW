@@ -18,17 +18,17 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        $this->call(MoviesTableSeeder::class);
+        $this->call(UsersTableSeeder::class); // User harus paling atas 
+        $this->call(MoviesTableSeeder::class); // Movie juga harus sebelum rating/review 
         $this->call(ActorsTableSeeder::class);
         $this->call(DirectorsTableSeeder::class);
         $this->call(GenresTableSeeder::class);
         $this->call(MovieActorsTableSeeder::class);
         $this->call(MovieDirectorsTableSeeder::class);
         $this->call(MovieGenresTableSeeder::class);
-        $this->call(RatingsTableSeeder::class);
-        $this->call(ReviewsTableSeeder::class);
-        $this->call(ReviewLikesTableSeeder::class);
-        $this->call(UsersTableSeeder::class);
-        $this->call(WatchlistsTableSeeder::class);
+        $this->call(RatingsTableSeeder::class); // Butuh User & Movie 
+        $this->call(ReviewsTableSeeder::class); // Butuh User & Movie 
+        $this->call(ReviewLikesTableSeeder::class); // Butuh Review & User 
+        $this->call(WatchlistsTableSeeder::class); // Butuh User & Movie
     }
 }
