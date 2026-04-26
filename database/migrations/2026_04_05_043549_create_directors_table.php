@@ -15,6 +15,9 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->string('name', 100)->unique('uq_directors_name');
             $table->string('photo_path')->nullable();
+            $table->timestamp('created_at')->useCurrent()->after('photo_path');
+            $table->timestamp('updated_at')->useCurrentOnUpdate()->useCurrent()->after('created_at');
+ 
         });
     }
 

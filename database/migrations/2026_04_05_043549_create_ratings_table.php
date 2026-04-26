@@ -15,12 +15,11 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->index('idx_ratings_user');
             $table->unsignedBigInteger('movie_id')->index('idx_ratings_movie');
-            $table->unsignedTinyInteger('score');
+            $table->unsignedTinyInteger('score')
             $table->timestamp('created_at')->useCurrent();
 
             $table->index(['movie_id', 'created_at'], 'idx_ratings_movie_created_at');
-            $table->unique(['user_id', 'movie_id'], 'uq_ratings_user_movie');
-        });
+            $table->unique(['user_id', 'movie_id'], 'uq_ratings_user_movie');        });
     }
 
     /**
