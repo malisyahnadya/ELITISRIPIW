@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('duration_minutes')->nullable();
             $table->string('poster_path')->nullable();
             $table->string('banner_path')->nullable();
+            $table->string('trailer_url')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->useCurrent();
         });
