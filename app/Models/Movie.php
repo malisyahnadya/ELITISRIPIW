@@ -177,13 +177,13 @@ class Movie extends Model
     // Accessor untuk mendapatkan URL poster, memeriksa apakah path sudah berupa URL atau perlu di-resolve
     public function getPosterUrlAttribute(): ?string
     {
-        return $this->resolveMediaUrl($this->poster_path);
+        return $this->ResolvesMediaUrls($this->poster_path);
     }
 
     // Accessor untuk mendapatkan URL banner, menggunakan helper yang sama dengan poster
     public function getBannerUrlAttribute(): ?string
     {
-        return $this->resolveMediaUrl($this->banner_path);
+        return $this->ResolvesMediaUrls($this->banner_path);
     }
 
     // Accessor untuk mendapatkan URL embed trailer dari YouTube

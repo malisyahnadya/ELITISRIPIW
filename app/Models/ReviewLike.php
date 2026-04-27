@@ -32,17 +32,20 @@ class ReviewLike extends Model
         return $this->belongsTo(Review::class);
     }
 
+    // Scope untuk mendapatkan like berdasarkan review tertentu
     public function scopeForReview(Builder $query, int $reviewId): Builder
     {
         return $query->where('review_id', $reviewId);
     }
 
+    // Scope untuk mendapatkan like berdasarkan user tertentu
     public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('user_id', $userId);
     }
 
-    public function existsForUserAndReview(int $userId, int $reviewId): bool
+    // Metode untuk mengecek apakah like sudah ada untuk user dan review tertentu
+    public static function existsForUserAndReview(int $userId, int $reviewId): bool
     {
         return $this->where('user_id', $userId)
             ->where('review_id', $reviewId)
