@@ -2,8 +2,6 @@
     <div class="bg-slate-950 text-slate-100">
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <section>
-                <h2 class="mb-4 text-xl font-bold tracking-wide text-cyan-300">Sedang Populer</h2>
-
                 @if ($popularMovies->isNotEmpty())
                     <div id="popular-carousel" class="relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
                         @foreach ($popularMovies as $index => $movie)
@@ -21,7 +19,12 @@
                                     <h3 class="text-2xl font-extrabold sm:text-4xl">{{ $movie->title }}</h3>
                                     <div class="mt-3 flex flex-wrap gap-2 text-sm text-slate-200">
                                         <span class="rounded-full bg-slate-800/80 px-3 py-1">{{ $movie->release_year }}</span>
-                                        <span class="rounded-full bg-slate-800/80 px-3 py-1">{{ number_format($movie->average_score, 1) }} / 10</span>
+                                        <span class="rounded-full bg-slate-800/80 px-3 py-1">{{ number_format($movie->average_score, 1) }} / 5</span>
+                                        <span class="rounded-full bg-slate-800/80 px-3 py-1" aria-label="Rating {{ number_format($movie->average_score, 1) }} dari 5">
+                                            @foreach ($movie->average_score_star_icons as $icon)
+                                                <i class="bi {{ $icon }} text-amber-300"></i>
+                                            @endforeach
+                                        </span>
                                         <span class="rounded-full bg-slate-800/80 px-3 py-1">{{ $movie->duration_formatted }}</span>
                                     </div>
                                 </div>
@@ -54,7 +57,15 @@
                             <div class="p-3">
                                 <h3 class="truncate text-sm font-semibold">{{ $movie->title }}</h3>
                                 <p class="mt-1 text-xs text-slate-400">{{ $movie->release_year }} • {{ $movie->duration_formatted }}</p>
-                                <p class="mt-2 text-xs text-cyan-300">⭐ {{ number_format($movie->average_score, 1) }} • {{ $movie->ratings_count }} rating</p>
+                                <p class="mt-2 text-xs text-cyan-300">
+                                    {{ number_format($movie->average_score, 1) }}/5
+                                    <span class="ml-1" aria-label="Rating {{ number_format($movie->average_score, 1) }} dari 5">
+                                        @foreach ($movie->average_score_star_icons as $icon)
+                                            <i class="bi {{ $icon }} text-amber-300"></i>
+                                        @endforeach
+                                    </span>
+                                    <span class="text-slate-300">• {{ $movie->ratings_count }} rating</span>
+                                </p>
                             </div>
                         </article>
                     @empty

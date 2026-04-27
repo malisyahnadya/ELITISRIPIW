@@ -74,6 +74,29 @@ class Movie extends Model
         return (float) ($this->ratings()->avg('score') ?? 0);
     }
 
+    // Accessor untuk ikon bintang full/half/empty berdasarkan skor aktual tanpa pembulatan ke integer
+    public function getAverageScoreStarIconsAttribute(): array
+    {
+        $score = max(0, min(Rating::MAX_SCORE, (float) $this->average_score));
+        $icons = [];
+
+        for ($i = 1; $i <= Rating::MAX_SCORE; $i++) {
+            if ($score >= $i) {
+                $icons[] = 'bi-star-fill';
+                continue;
+            }
+
+            if ($score >= ($i - 0.5)) {
+                $icons[] = 'bi-star-half';
+                continue;
+            }
+
+            $icons[] = 'bi-star';
+        }
+
+        return $icons;
+    }
+
     // Accessor untuk mendapatkan durasi dalam format jam dan menit
     public function getDurationFormattedAttribute(): string
     {
