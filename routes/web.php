@@ -22,7 +22,7 @@ Route::middleware('auth')->group(function () {
     // KHUSUS ADMIN (Satpam Middleware Aktif)
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', function () {
-            return view('admin.index'); // Manggil file resources/views/admin/index.blade.php
+            return view('admin.index');
         })->name('admin.dashboard');
     });
 });
