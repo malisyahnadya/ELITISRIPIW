@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Actor;
 use Illuminate\Http\Request;
 
 class ActorController extends Controller
@@ -12,7 +13,20 @@ class ActorController extends Controller
      */
     public function index()
     {
-        //
+        $search = request('search');
+        $sort = request('sort', 'asc');
+
+        $actors = Actor::query()
+            ->search($search)
+            ->sortByName($sort)
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.actors.index', [
+            'actors' => $actors,
+            'search' => $search,
+            'sort' => $sort,
+        ]);
     }
 
     /**
