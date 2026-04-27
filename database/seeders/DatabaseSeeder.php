@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+        $this->call(DemoMovieSeeder::class);
         $this->call(UsersTableSeeder::class); // User harus paling atas 
         $this->call(MoviesTableSeeder::class); // Movie juga harus sebelum rating/review 
         $this->call(ActorsTableSeeder::class);

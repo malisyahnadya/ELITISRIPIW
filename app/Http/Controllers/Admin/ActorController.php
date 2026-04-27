@@ -24,11 +24,7 @@ class ActorController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.actors.index', [
-            'actors' => $actors,
-            'search' => $search,
-            'sort' => $sort,
-        ]);
+        return view('admin.actors.index', compact('actors', 'search', 'sort'));
     }
 
     /**

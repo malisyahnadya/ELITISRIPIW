@@ -4,62 +4,39 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use App\Models\Review;
+use Illuminate\Http\RedirectResponse;
 
 class ReviewController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Nampilin daftar review buat dipantau admin.
      */
-    public function index()
+    public function index(): View
     {
-        //
+        $search = request('search');
+        $sort   = request('sort', 'desc');
+
+        $reviews = Review::query()
+            ->with(['user', 'movie']) // WAJIB: Eager loading biar gak lemot pas manggil nama user & judul film
+            ->search($search)         // Asumsi lo bikin scopeSearch di Model Review
+            ->latest()                // Review terbaru muncul paling atas
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.reviews.index', compact('reviews', 'search', 'sort'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Hapus review yang melanggar aturan (Spam/Toxic).
      */
-    public function create()
+    public function destroy(Review $review): RedirectResponse
     {
-        //
-    }
+        // Langsung eksekusi hapus tanpa ampun
+        $review->delete();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('admin.reviews.index')
+            ->with('success', 'Review has been successfully moderated (deleted).');
     }
 }

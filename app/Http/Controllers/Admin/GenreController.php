@@ -13,7 +13,7 @@ class GenreController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() :view
+    public function index() :View
     {
         $search = request('search');
         $sort = request('sort', 'asc');
@@ -24,11 +24,7 @@ class GenreController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.genres.index', [
-            'genres' => $genres,
-            'search' => $search,
-            'sort' => $sort,
-        ]);
+        return view('admin.genres.index', compact('genres', 'search', 'sort'));
     }
 
     /**
@@ -59,28 +55,24 @@ class GenreController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Genre $genre)
     {
-        $genre = Genre::findOrFail($id);
         return view('admin.genres.show', compact('genre'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Genre $genre)
     {
-        $genre = Genre::findOrFail($id);
         return view('admin.genres.edit', compact('genre'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource in storage.f
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Genre $genre)
     {
-        $genre = Genre::findOrFail($id);
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100', 'unique:genres,name,' . $genre->id],
         ]);
@@ -96,9 +88,8 @@ class GenreController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Genre $genre)
     {
-        $genre = Genre::findOrFail($id);
         $genre->delete();
 
         return redirect()->route('admin.genres.index')
