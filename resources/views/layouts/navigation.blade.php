@@ -19,6 +19,32 @@
                 </div>
             </div>
 
+            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-center sm:px-6">
+                <div class="relative w-full max-w-md" data-live-search data-search-url="{{ route('search') }}" data-suggest-url="{{ route('search.suggest') }}">
+                    <form method="GET" action="{{ route('search') }}">
+                        <input
+                            type="search"
+                            name="q"
+                            value="{{ request('q', '') }}"
+                            data-search-input
+                            autocomplete="off"
+                            placeholder="Cari film..."
+                            class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                        >
+                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                            <i class="bi bi-search"></i>
+                        </span>
+                    </form>
+
+                    <div data-search-dropdown class="absolute left-0 right-0 z-30 mt-2 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                        <ul data-search-results class="max-h-80 overflow-y-auto"></ul>
+                        <a data-search-see-more href="{{ route('search') }}" class="block border-t border-slate-200 px-3 py-2 text-xs font-semibold text-cyan-700 hover:bg-cyan-50">
+                            See more
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 @auth
                     <x-dropdown align="right" width="48">
@@ -72,6 +98,32 @@
     </div>
 
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <div class="px-4 pb-2">
+            <div class="relative" data-live-search data-search-url="{{ route('search') }}" data-suggest-url="{{ route('search.suggest') }}">
+                <form method="GET" action="{{ route('search') }}">
+                    <input
+                        type="search"
+                        name="q"
+                        value="{{ request('q', '') }}"
+                        data-search-input
+                        autocomplete="off"
+                        placeholder="Cari film..."
+                        class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                    >
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="bi bi-search"></i>
+                    </span>
+                </form>
+
+                <div data-search-dropdown class="absolute left-0 right-0 z-30 mt-2 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                    <ul data-search-results class="max-h-80 overflow-y-auto"></ul>
+                    <a data-search-see-more href="{{ route('search') }}" class="block border-t border-slate-200 px-3 py-2 text-xs font-semibold text-cyan-700 hover:bg-cyan-50">
+                        See more
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <div class="pt-2 pb-3 space-y-1">
             @auth
                 @if(Auth::user()->role === 'admin')

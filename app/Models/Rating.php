@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Validation\ValidationException;
 
 class Rating extends Model
 {
     use HasFactory;
+
+    public const MIN_SCORE = 1;
+    public const MAX_SCORE = 5;
 
     const UPDATED_AT = null;
 
@@ -23,6 +27,20 @@ class Rating extends Model
         'score' => 'integer',
         'created_at' => 'datetime',
     ];
+
+    // Mutator untuk memastikan skor selalu antara MIN_SCORE dan MAX_SCORE
+    public function setScoreAttribute(mixed $value): void
+    {
+        $score = (int) $value;
+
+        if ($score < self::MIN_SCORE || $score > self::MAX_SCORE) {
+            throw ValidationException::withMessages([
+                'score' => sprintf('Score harus antara %d sampai %d.', self::MIN_SCORE, self::MAX_SCORE),
+            ]);
+        }
+
+        $this->attributes['score'] = $score;
+    }
 
     public function user(): BelongsTo
     {
