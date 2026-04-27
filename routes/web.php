@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Admin\DirectorController as AdminDirectorController;
+use App\Http\Controllers\Admin\GenreController as AdminGenreController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
@@ -24,6 +26,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/', function () {
             return view('admin.index');
         })->name('admin.dashboard');
+
+        Route::resource('directors', AdminDirectorController::class)
+            ->names('admin.directors');
+        
+        Route::resource('genres', AdminGenreController::class)
+            ->names('admin.genres');
+
     });
 });
 
