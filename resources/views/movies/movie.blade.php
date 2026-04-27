@@ -1,5 +1,7 @@
 <x-app-layout>
     <div class="bg-slate-950 text-slate-100">
+        <h1>Perhatikan fungsi yang sudah ada di controller, dan routing di web.php</h1>
+        <h2>Ini masih hasil generate AI, belum sesuai sama desain kita</h2>
         <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
             <a href="{{ url()->previous() }}" class="mb-4 inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800">
                 <i class="bi bi-arrow-left"></i>
@@ -84,6 +86,7 @@
                     </div>
                 </div>
             </section>
+
         </div>
     </div>
 </x-app-layout>

@@ -31,4 +31,10 @@ class Genre extends Model
         return $query->where('name', 'LIKE', '%' . $term . '%');
     }
 
+    // Scope untuk mengurutkan genre berdasarkan nama
+    public function scopeSortByName(Builder $query, string $direction = 'asc'): Builder
+    {
+        return $query->orderBy('name', $direction);
+    }
+
 }

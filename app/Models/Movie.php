@@ -225,4 +225,18 @@ class Movie extends Model
         return $url;
     }
 
+    // app/Models/Movie.php
+
+    // Scope untuk mendapatkan data yang diperlukan untuk ditampilkan di card pada halaman profil pengguna
+    public function scopeForProfileCard(Builder $query): Builder
+    {
+        return $query->select(['movies.id', 'movies.title', 'movies.poster_path', 'movies.release_year'])
+                     ->withRatingsStats();
+    }
+
+    public function scopeSortByTitle(Builder $query, string $direction = 'asc'): Builder
+    {
+        return $query->orderBy('title', $direction);
+    }
+
 }

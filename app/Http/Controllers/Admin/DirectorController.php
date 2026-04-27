@@ -25,11 +25,7 @@ class DirectorController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.directors.index', [
-            'directors' => $directors,
-            'search' => $search,
-            'sort' => $sort,
-        ]);
+        return view('admin.directors.index', compact('directors', 'search', 'sort'));
     }
 
     /**

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id(); // Standar Laravel
             $table->string('username', 30)->unique();
+            $table->string('name', 250); // Nama lengkap, bisa beda sama username   
             $table->string('email', 100)->unique();
             $table->timestamp('email_verified_at')->nullable(); // Butuh buat Breeze
             $table->string('password'); // WAJIB 'password', jangan 'password_hash'

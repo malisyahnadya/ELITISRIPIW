@@ -21,6 +21,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'name',
         'username',
         'email',
         'password',
@@ -106,13 +107,46 @@ class User extends Authenticatable
             ->withPivot('created_at');
     }
 
+    // Scope untuk mendapatkan daftar watchlist user dengan informasi film dan statusnya
+    public function profileWatchList()
+    {
+        return $this->watchedMovies()
+            ->forProfileCard()
+            ->withPivot('status')
+            ->latest('watchlists.created_at');
+    }
+
+    // Relasi khusus buat nampilin history review di halaman profil
+    public function profileReviewedMovies()
+    {
+        return $this->reviewedMovies()
+            ->forProfileCard()
+            ->withPivot('review_text', 'reviews.created_at', 'reviews.updated_at')
+            ->latest('reviews.created_at');
+    }
+
+    // Relasi khusus buat nampilin history rating di halaman profil
+    public function profileRatedMovies()
+    {
+        return $this->ratedMovies()
+            ->forProfileCard()
+            ->withPivot('score', 'ratings.created_at')
+            ->latest('ratings.created_at');
+    }
+
     // Accessor untuk mendapatkan URL lengkap dari profile photo
     public function getProfilePhotoUrlAttribute(): ?string
     {
-        return $this->ResolvesMediaUrls($this->profile_photo);
+        return $this->resolveMediaUrl($this->profile_photo);
     }
     
-    
+   
+    // Scope untuk mendapatkan statistik profil seperti jumlah review, rating, dll.
+    public function scopeWithProfileStats(Builder $query): Builder
+    {
+        return $query->withCount('reviews', 'ratings', 'watchedMovies', 'likedReviews');
+    }
+
     // Scope untuk pencarian berdasarkan username atau email
     public function scopeSearch(Builder $query, ?string $term): Builder
     {

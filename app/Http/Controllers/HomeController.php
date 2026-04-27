@@ -36,12 +36,15 @@ class HomeController extends Controller
             ->withCount('reviews')
             ->orderByRaw('(ratings_count + reviews_count) DESC')
             ->orderByDesc('ratings_avg_score')
-            ->limit(12)
+            ->take(12)
             ->get();
 
         // Default kosong untuk user yang belum login.
         // Ini memudahkan frontend: selalu menerima collection, jadi tidak perlu null-check ekstra.
-        $userWatchlist = collect();
+        $hasMoreRecommended = Movie::count() > 12;
+
+        $userWatchlist = collect(); // Default kosong untuk user yang belum login. Ini memudahkan frontend: selalu menerima collection, jadi tidak perlu null-check ekstra.
+        $hasMoreWatchlist = false; // Flag untuk indikasi apakah masih ada data watchlist lebih banyak dari yang ditampilkan (12 item). Berguna untuk frontend menampilkan tombol "Lihat Semua" jika true.
 
         if (Auth::check()) {
             // Section "Watchlist Saya": hanya data user login, urut update terbaru.
@@ -54,8 +57,10 @@ class HomeController extends Controller
                     },
                 ])
                 ->latest('updated_at')
-                ->limit(12)
+                ->take(12)
                 ->get();
+            
+            $hasMoreWatchlist = Watchlist::where('user_id', Auth::id())->count() > 12;
         }
 
         // Nama key di bawah dipakai langsung oleh halaman home:
@@ -64,6 +69,8 @@ class HomeController extends Controller
             'popularMovies' => $popularMovies,
             'recommendedMovies' => $recommendedMovies,
             'userWatchlist' => $userWatchlist,
+            'hasMoreRecommended' => $hasMoreRecommended,
+            'hasMoreWatchlist' => $hasMoreWatchlist,
         ]);
     }
 }
