@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Watchlist;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class WatchlistController extends Controller
 {
@@ -27,7 +29,27 @@ class WatchlistController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'movie_id' => ['required', 'integer', 'exists:movies,id'],
+            'status' => [
+                'required',
+                Rule::in([
+                    Watchlist::STATUS_PLAN_TO_WATCH,
+                    Watchlist::STATUS_WATCHING,
+                    Watchlist::STATUS_COMPLETED,
+                ]),
+            ],
+        ]);
+
+        Watchlist::updateOrCreate(
+            [
+                'user_id' => $request->user()->id,
+                'movie_id' => $validated['movie_id'],
+            ],
+            ['status' => $validated['status']]
+        );
+
+        return back()->with('status', 'watchlist-saved');
     }
 
     /**
@@ -51,7 +73,27 @@ class WatchlistController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'status' => [
+                'required',
+                Rule::in([
+                    Watchlist::STATUS_PLAN_TO_WATCH,
+                    Watchlist::STATUS_WATCHING,
+                    Watchlist::STATUS_COMPLETED,
+                ]),
+            ],
+        ]);
+
+        $watchlist = Watchlist::query()
+            ->where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $watchlist->update([
+            'status' => $validated['status'],
+        ]);
+
+        return back()->with('status', 'watchlist-updated');
     }
 
     /**
