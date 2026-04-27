@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Concerns\ResolvesMediaUrls;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
+    use ResolvesMediaUrls;
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +28,7 @@ class User extends Authenticatable
         'bio',
         'role',
     ];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -34,10 +38,6 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
-
-
-
 
     /**
      * The attributes that should be cast.
@@ -103,5 +103,81 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Review::class, 'review_likes')
             ->withPivot('created_at');
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return $this->resolveMediaUrl($this->profile_photo);
+    }
+    
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        return $query->where('username', 'LIKE', '%' . $term . '%')
+            ->orWhere('email', 'LIKE', '%' . $term . '%');
+    }
+
+    public function scopeSortByUsername(Builder $query, string $direction = 'asc'): Builder
+    {
+        $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
+
+        return $query->orderBy('username', $direction);
+    }
+
+    public function scopeSortByEmail(Builder $query, string $direction = 'asc'): Builder
+    {
+        $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
+
+        return $query->orderBy('email', $direction);
+    }
+
+    public function scopeSortByCreatedAt(Builder $query, string $direction = 'asc'): Builder
+    {
+        $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
+
+        return $query->orderBy('created_at', $direction);
+    }
+
+    public function hasLikedReview(Review $review): bool
+    {
+        return $this->likedReviews()->where('review_id', $review->id)->exists();
+    }
+
+    public function hasInWatchlist(Movie $movie): bool
+    {
+        return $this->watchedMovies()->where('movie_id', $movie->id)->exists();
+    }
+
+    public function hasRatedMovie(Movie $movie): bool
+    {
+        return $this->ratedMovies()->where('movie_id', $movie->id)->exists();
+    }
+
+    public function hasReviewedMovie(Movie $movie): bool
+    {
+        return $this->reviewedMovies()->where('movie_id', $movie->id)->exists();
+    }
+
+    public function scopeWithReviewCount(Builder $query): Builder
+    {
+        return $query->withCount('reviews');
+    }
+
+    public function scopeWithRatingCount(Builder $query): Builder
+    {
+        return $query->withCount('ratings');
+    }
+
+    public function scopeWithWatchlistCount(Builder $query): Builder
+    {
+        return $query->withCount('watchedMovies');
+    }
+
+    public function scopeWithLikedReviewsCount(Builder $query): Builder
+    {
+        return $query->withCount('likedReviews');
     }
 }

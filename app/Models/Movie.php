@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesMediaUrls;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Movie extends Model
 {
     use HasFactory;
+    use ResolvesMediaUrls;
 
     protected $fillable = [
         'title',
@@ -59,6 +60,18 @@ class Movie extends Model
     public function watchlists(): HasMany
     {
         return $this->hasMany(Watchlist::class);
+    }
+
+    // Accessor untuk mendapatkan rata-rata skor rating, dengan optimisasi jika sudah di-preload
+    public function getAverageScoreAttribute(): float
+    {
+        $preloadedAverage = $this->getAttribute('ratings_avg_score');
+
+        if ($preloadedAverage !== null) {
+            return (float) $preloadedAverage;
+        }
+
+        return (float) ($this->ratings()->avg('score') ?? 0);
     }
 
     // Accessor untuk mendapatkan durasi dalam format jam dan menit
@@ -189,21 +202,4 @@ class Movie extends Model
         return $url;
     }
 
-    // Helper method untuk mengonversi path media menjadi URL yang dapat diakses
-    protected function resolveMediaUrl(?string $path): ?string
-    {
-        if (empty($path)) {
-            return null;
-        }
-
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-
-        if (str_starts_with($path, 'storage/')) {
-            return asset($path);
-        }
-
-        return Storage::url($path);
-    }
 }
