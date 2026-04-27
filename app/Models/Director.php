@@ -28,11 +28,13 @@ class Director extends Model
         return $this->belongsToMany(Movie::class, 'movie_directors');
     }
 
+    // Mwtode untuk mendapatkan URL foto
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this -> hasMediaUrl ($this->photo_path);
+        return $this -> ResolvesMediaUrls($this->photo_path);
     }
 
+    // Scope untuk mencari sutradara berdasarkan nama
     public function scopeSearch(Builder $query, ?string $term) : Builder
     {
         if (blank($term)) {
@@ -42,6 +44,7 @@ class Director extends Model
         return $query->where('name', 'LIKE', '%' . $term . '%');
     }
 
+    // Scope untuk mengurutkan sutradara berdasarkan nama
     public function scopeSortByName(Builder $query, string $direction = 'asc') : Builder
     {
         $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';

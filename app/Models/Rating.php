@@ -34,16 +34,19 @@ class Rating extends Model
         return $this->belongsTo(Movie::class);
     }
 
+    // Scope untuk mendapatkan rating berdasarkan movie tertentu
     public function scopeForMovie(Builder $query, int $movieId): Builder
     {
         return $query->where('movie_id', $movieId);
     }
 
+    // Scope untuk mendapatkan rating berdasarkan user tertentu
     public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('user_id', $userId);
     }
 
+    // Metode untuk menghitung rata-rata skor untuk sebuah film
     public static function averageScoreForMovie(int $movieId): float
     {
         return (float) (static::query()->forMovie($movieId)->avg('score') ?? 0);

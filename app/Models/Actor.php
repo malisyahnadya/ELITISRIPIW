@@ -29,10 +29,11 @@ class Actor extends Model
             ->withPivot('role_name');
     }
 
+    // Metode untuk mendapatkan nama peran actor dalam sebuah film
     public function getRoleNameForMovie(Movie $movie): ?string
     {
         $pivot = $this->movies()
-            ->where('movie_id', $movie->id)
+            ->wherePivot('movie_id', $movie->id)
             ->first();
 
         return $pivot ? $pivot->pivot->role_name : null;
@@ -40,7 +41,7 @@ class Actor extends Model
 
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this -> hasMediaUrl ($this->photo_path);
+        return $this->ResolvesMediaUrls($this->photo_path);
     }
 
     public function scopeSearch(Builder $query, ?string $term): Builder

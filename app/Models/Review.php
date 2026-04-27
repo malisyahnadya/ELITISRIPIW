@@ -73,19 +73,20 @@ class Review extends Model
         return $query->withCount('likes');
     }
 
-    // Scope untuk mengurutkan review berdasarkan jumlah like.
+    // Scope untuk mengurutkan review berdasarkan jumlah like (self-contained).
     public function scopeOrderByLikes(Builder $query, string $direction = 'desc'): Builder
     {
         $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
 
-        return $query->orderBy('likes_count', $direction);
+        return $query
+            ->withLikesCount()
+            ->orderBy('likes_count', $direction);
     }
 
     // Scope gabungan untuk review populer: like terbanyak lalu terbaru.
     public function scopePopular(Builder $query): Builder
     {
         return $query
-            ->withLikesCount()
             ->orderByLikes('desc')
             ->latestFirst();
     }

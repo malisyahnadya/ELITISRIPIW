@@ -36,21 +36,25 @@ class Watchlist extends Model
         return $this->belongsTo(Movie::class);
     }
 
+    // Scope untuk mendapatkan watchlist berdasarkan user
     public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('user_id', $userId);
     }
 
+    // Scope untuk mendapatkan watchlist berdasarkan movie
     public function scopeForMovie(Builder $query, int $movieId): Builder
     {
         return $query->where('movie_id', $movieId);
     }
 
+    // Scope untuk mendapatkan watchlist berdasarkan status
     public function scopeWithStatus(Builder $query, string $status): Builder
     {
         return $query->where('status', $status);
     }
 
+    // Scope untuk pencarian berdasarkan judul film
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         if (blank($term)) {

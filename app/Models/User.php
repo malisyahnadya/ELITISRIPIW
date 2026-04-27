@@ -50,6 +50,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    // Metode untuk memeriksa apakah user memiliki peran admin
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -105,21 +106,27 @@ class User extends Authenticatable
             ->withPivot('created_at');
     }
 
+    // Accessor untuk mendapatkan URL lengkap dari profile photo
     public function getProfilePhotoUrlAttribute(): ?string
     {
-        return $this->resolveMediaUrl($this->profile_photo);
+        return $this->ResolvesMediaUrls($this->profile_photo);
     }
     
+    
+    // Scope untuk pencarian berdasarkan username atau email
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         if (blank($term)) {
             return $query;
         }
 
-        return $query->where('username', 'LIKE', '%' . $term . '%')
-            ->orWhere('email', 'LIKE', '%' . $term . '%');
+        return $query->where(function (Builder $searchQuery) use ($term) {
+            $searchQuery->where('username', 'LIKE', '%' . $term . '%')
+                ->orWhere('email', 'LIKE', '%' . $term . '%');
+        });
     }
 
+    // Scope untuk mengurutkan berdasarkan username
     public function scopeSortByUsername(Builder $query, string $direction = 'asc'): Builder
     {
         $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
@@ -127,6 +134,7 @@ class User extends Authenticatable
         return $query->orderBy('username', $direction);
     }
 
+    // Scope untuk mengurutkan berdasarkan email
     public function scopeSortByEmail(Builder $query, string $direction = 'asc'): Builder
     {
         $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
@@ -134,6 +142,7 @@ class User extends Authenticatable
         return $query->orderBy('email', $direction);
     }
 
+    // Scope untuk mengurutkan berdasarkan tanggal pembuatan
     public function scopeSortByCreatedAt(Builder $query, string $direction = 'asc'): Builder
     {
         $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
@@ -141,41 +150,49 @@ class User extends Authenticatable
         return $query->orderBy('created_at', $direction);
     }
 
+    // Scope untuk mengecek apakah user telah menyukai sebuah ulasan
     public function hasLikedReview(Review $review): bool
     {
         return $this->likedReviews()->where('review_id', $review->id)->exists();
     }
 
+    // Metode untuk mengecek apakah user memiliki film tertentu di watchlist
     public function hasInWatchlist(Movie $movie): bool
     {
         return $this->watchedMovies()->where('movie_id', $movie->id)->exists();
     }
 
+    //    Metode untuk mengecek apakah user telah memberikan rating pada sebuah film
     public function hasRatedMovie(Movie $movie): bool
     {
         return $this->ratedMovies()->where('movie_id', $movie->id)->exists();
     }
 
+    // Metode untuk mengecek apakah user telah menulis review untuk sebuah film
     public function hasReviewedMovie(Movie $movie): bool
     {
         return $this->reviewedMovies()->where('movie_id', $movie->id)->exists();
     }
 
+    // Scope untuk menghitung jumlah ulasan yang ditulis oleh user
     public function scopeWithReviewCount(Builder $query): Builder
     {
         return $query->withCount('reviews');
     }
 
+    // Scope untuk menghitung jumlah rating yang diberikan oleh user
     public function scopeWithRatingCount(Builder $query): Builder
     {
         return $query->withCount('ratings');
     }
 
+    // Scope untuk menghitung jumlah film yang ada di watchlist user
     public function scopeWithWatchlistCount(Builder $query): Builder
     {
         return $query->withCount('watchedMovies');
     }
 
+    // Scope untuk menghitung jumlah review yang disukai oleh user
     public function scopeWithLikedReviewsCount(Builder $query): Builder
     {
         return $query->withCount('likedReviews');

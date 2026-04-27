@@ -22,6 +22,7 @@ class Genre extends Model
         return $this->belongsToMany(Movie::class, 'movie_genres');
     }
 
+    // Scope untuk mencari genre berdasarkan nama
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         if (blank($term)) {
