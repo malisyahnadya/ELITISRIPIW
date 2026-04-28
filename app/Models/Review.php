@@ -49,6 +49,24 @@ class Review extends Model
             ->withPivot('created_at');
     }
 
+    // Scope untuk pencarian review berdasarkan isi, nama user, username, atau judul movie.
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $searchQuery) use ($term) {
+            $searchQuery->where('review_text', 'LIKE', '%' . $term . '%')
+                ->orWhereHas('user', function (Builder $userQuery) use ($term) {
+                    $userQuery->where('name', 'LIKE', '%' . $term . '%')
+                        ->orWhere('username', 'LIKE', '%' . $term . '%');
+                })
+                ->orWhereHas('movie', function (Builder $movieQuery) use ($term) {
+                    $movieQuery->where('title', 'LIKE', '%' . $term . '%');
+                });
+        });
+    }
     // Scope untuk mengurutkan review dari yang paling baru.
     public function scopeLatestFirst(Builder $query): Builder
     {

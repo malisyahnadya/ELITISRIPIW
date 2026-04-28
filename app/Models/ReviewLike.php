@@ -47,7 +47,8 @@ class ReviewLike extends Model
     // Metode untuk mengecek apakah like sudah ada untuk user dan review tertentu
     public static function existsForUserAndReview(int $userId, int $reviewId): bool
     {
-        return $this->where('user_id', $userId)
+        return static::query()
+            ->where('user_id', $userId)
             ->where('review_id', $reviewId)
             ->exists();
     }

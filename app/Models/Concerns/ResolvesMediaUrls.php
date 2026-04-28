@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Storage;
 
 trait ResolvesMediaUrls
 {
-    protected function resolveMediaUrl(?string $path): ?string
+    protected function resolveMediaUrl(?string $path, ?string $fallback = null): ?string
     {
         if (empty($path)) {
-            return null;
+            return $fallback;
         }
 
         $path = trim($path);
@@ -25,9 +25,19 @@ trait ResolvesMediaUrls
         $path = ltrim($path, '/');
 
         if (str_starts_with($path, 'storage/')) {
-            return asset($path);
+            $relativePath = substr($path, strlen('storage/'));
+
+            if (Storage::disk('public')->exists($relativePath)) {
+                return asset($path);
+            }
+
+            return $fallback;
         }
 
-        return Storage::url($path);
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::url($path);
+        }
+
+        return $fallback;
     }
 }

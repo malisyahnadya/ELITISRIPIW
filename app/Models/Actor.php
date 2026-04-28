@@ -13,9 +13,14 @@ class Actor extends Model
     use HasFactory;
     use ResolvesMediaUrls;
 
+    protected $table = 'actors';
+
+    public $timestamps = false;
+
     protected $fillable = [
         'name',
         'photo_path',
+        'profile_path',
     ];
 
     protected $casts = [
@@ -29,7 +34,6 @@ class Actor extends Model
             ->withPivot('role_name');
     }
 
-    // Metode untuk mendapatkan nama peran actor dalam sebuah film
     public function getRoleNameForMovie(Movie $movie): ?string
     {
         $pivot = $this->movies()
@@ -41,7 +45,7 @@ class Actor extends Model
 
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this->resolveMediaUrl($this->photo_path);
+        return $this->resolveMediaUrl($this->profile_path ?: $this->photo_path);
     }
 
     public function scopeSearch(Builder $query, ?string $term): Builder
@@ -59,5 +63,4 @@ class Actor extends Model
 
         return $query->orderBy('name', $direction);
     }
-
 }
