@@ -41,7 +41,7 @@ class Actor extends Model
 
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this->ResolvesMediaUrls($this->photo_path);
+        return $this->resolveMediaUrl($this->photo_path);
     }
 
     public function scopeSearch(Builder $query, ?string $term): Builder
