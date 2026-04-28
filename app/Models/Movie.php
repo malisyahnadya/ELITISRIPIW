@@ -200,13 +200,13 @@ class Movie extends Model
     // Accessor untuk mendapatkan URL poster, memeriksa apakah path sudah berupa URL atau perlu di-resolve
     public function getPosterUrlAttribute(): ?string
     {
-        return $this->resolveMediaUrl($this->poster_path);
+        return $this->resolveMediaUrl($this->poster_path, asset('images/default-poster.svg'));
     }
 
     // Accessor untuk mendapatkan URL banner, menggunakan helper yang sama dengan poster
     public function getBannerUrlAttribute(): ?string
     {
-        return $this->resolveMediaUrl($this->banner_path);
+        return $this->resolveMediaUrl($this->banner_path, asset('images/default-banner.svg'));
     }
 
     // Accessor untuk mendapatkan URL embed trailer dari YouTube
@@ -230,7 +230,7 @@ class Movie extends Model
     // Scope untuk mendapatkan data yang diperlukan untuk ditampilkan di card pada halaman profil pengguna
     public function scopeForProfileCard(Builder $query): Builder
     {
-        return $query->select(['movies.id', 'movies.title', 'movies.poster_path', 'movies.release_year'])
+        return $query->select(['movies.id', 'movies.title', 'movies.poster_path', 'movies.release_year', 'movies.duration_minutes'])
                      ->withRatingsStats();
     }
 

@@ -147,7 +147,7 @@ class User extends Authenticatable
         return $query->withCount('reviews', 'ratings', 'watchedMovies', 'likedReviews');
     }
 
-    // Scope untuk pencarian berdasarkan username atau email
+    // Scope untuk pencarian berdasarkan name, username, atau email
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         if (blank($term)) {
@@ -155,7 +155,8 @@ class User extends Authenticatable
         }
 
         return $query->where(function (Builder $searchQuery) use ($term) {
-            $searchQuery->where('username', 'LIKE', '%' . $term . '%')
+            $searchQuery->where('name', 'LIKE', '%' . $term . '%')
+                ->orWhere('username', 'LIKE', '%' . $term . '%')
                 ->orWhere('email', 'LIKE', '%' . $term . '%');
         });
     }
