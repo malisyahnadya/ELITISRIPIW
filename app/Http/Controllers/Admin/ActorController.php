@@ -4,21 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Actor;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ActorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): View
     {
         $search = request('search');
         $sort = request('sort', 'asc');
 
         $actors = Actor::query()
+            ->withCount('movies')
             ->search($search)
             ->sortByName($sort)
             ->paginate(10)
@@ -27,77 +27,52 @@ class ActorController extends Controller
         return view('admin.actors.index', compact('actors', 'search', 'sort'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): View
     {
         return view('admin.actors.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:100', 'unique:actors,name'],
-            'photo' => ['nullable', 'image', 'max:2048'],
+            'name' => ['required', 'string', 'max:100', Rule::unique('actors', 'name')],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
-
-        $photoPath = null;
-
-        if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('actors', 'public');
-        }
 
         Actor::create([
             'name' => $validated['name'],
-            'photo_path' => $photoPath,
+            'photo_path' => $request->hasFile('photo') ? $request->file('photo')->store('actors', 'public') : null,
         ]);
 
         return redirect()->route('admin.actors.index')
-            ->with('success', 'Actor created successfully.');
+            ->with('success', 'Actor berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Actor $actor): RedirectResponse
     {
-        $actor = Actor::findOrFail($id);
-        return view('admin.actors.show', compact('actor'));
+        return redirect()->route('admin.actors.edit', $actor);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Actor $actor): View
     {
-        $actor = Actor::findOrFail($id);
+        $actor->loadCount('movies');
+
         return view('admin.actors.edit', compact('actor'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Actor $actor): RedirectResponse
     {
-        $actor = Actor::findOrFail($id);
-
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:100', 'unique:actors,name,' . $actor->id],
-            'photo' => ['nullable', 'image', 'max:2048'],
+            'name' => ['required', 'string', 'max:100', Rule::unique('actors', 'name')->ignore($actor->id)],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         $photoPath = $actor->photo_path;
 
         if ($request->hasFile('photo')) {
-            // Hapus foto lama jika ada
             if ($photoPath) {
                 Storage::disk('public')->delete($photoPath);
             }
-            // Simpan foto baru
             $photoPath = $request->file('photo')->store('actors', 'public');
         }
 
@@ -107,24 +82,19 @@ class ActorController extends Controller
         ]);
 
         return redirect()->route('admin.actors.index')
-            ->with('success', 'Actor updated successfully.');
+            ->with('success', 'Actor berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Actor $actor): RedirectResponse
     {
-        $actor = Actor::findOrFail($id);
-
-        // Hapus foto jika ada
         if ($actor->photo_path) {
             Storage::disk('public')->delete($actor->photo_path);
         }
 
+        $actor->movies()->detach();
         $actor->delete();
 
         return redirect()->route('admin.actors.index')
-            ->with('success', 'Actor deleted successfully.');
+            ->with('success', 'Actor berhasil dihapus.');
     }
 }
