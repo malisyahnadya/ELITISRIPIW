@@ -20,7 +20,7 @@ class UsersTableSeeder extends Seeder
 
         DB::table('users')->insert([
             [
-                'id' => 1,
+                'id' => 100,
                 'name' => 'Administrator',
                 'username' => 'admin',
                 'email' => 'admin@demo.com',
@@ -32,7 +32,7 @@ class UsersTableSeeder extends Seeder
                 'updated_at' => $now,
             ],
             [
-                'id' => 2,
+                'id' => 101,
                 'name' => 'Amir Fadli',
                 'username' => 'amir',
                 'email' => 'amir@demo.com',
@@ -44,7 +44,7 @@ class UsersTableSeeder extends Seeder
                 'updated_at' => $now,
             ],
             [
-                'id' => 3,
+                'id' => 102,
                 'name' => 'Nisa Putri',
                 'username' => 'nisa',
                 'email' => 'nisa@demo.com',
@@ -56,7 +56,7 @@ class UsersTableSeeder extends Seeder
                 'updated_at' => $now,
             ],
             [
-                'id' => 4,
+                'id' => 103,
                 'name' => 'Budi Pratama',
                 'username' => 'budi',
                 'email' => 'budi@demo.com',
