@@ -1,539 +1,392 @@
 <x-app-layout>
-{{--
-    ============================================================
-    HALAMAN DETAIL FILM
-    Variabel yang tersedia dari MovieController@show:
-      - $movie          : Movie model (dengan relasi: directors, actors, genres, reviews.user)
-      - $userWatchlist  : Watchlist|null – watchlist item user yang sedang login
-      - $userRating     : Rating|null    – rating dari user yang sedang login
-      - $userReview     : Review|null    – review dari user yang sedang login
-    ============================================================
---}}
+    @php
+        $banner = $movie->banner_url ?: $movie->poster_url ?: asset('images/default-banner.svg');
+        $poster = $movie->poster_url ?: asset('images/default-poster.svg');
+        $averageScore = (float) $movie->average_score;
+        $ratingCount = (int) ($movie->ratings_count ?? 0);
+        $selectedStatus = old('status', $userWatchlist?->status ?? 'plan_to_watch');
+        $currentUserScore = (int) old('score', $userRating?->score ?? 0);
+        $trailerEmbedUrl = $movie->trailer_embed_url;
+    @endphp
 
-{{-- ═══════════════════════════════════════════════════════════
-     TRAILER MODAL (tersembunyi secara default, muncul via JS)
-     ═══════════════════════════════════════════════════════════ --}}
-@if ($movie->trailer_embed_url)
-<div
-    id="trailer-modal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-    role="dialog"
-    aria-modal="true"
-    aria-label="Movie Trailer">
-
-    <div class="relative w-full max-w-4xl">
-
-        {{-- Tombol tutup modal --}}
-        <button
-            id="trailer-close"
-            class="absolute -top-10 right-0 text-white/70 hover:text-white transition-colors flex items-center gap-1.5 text-sm font-semibold"
-            aria-label="Close trailer">
-            <i class="bi bi-x-lg"></i> Close
-        </button>
-
-        {{-- Embed YouTube dengan aspect ratio 16:9 --}}
-        <div class="aspect-video w-full overflow-hidden rounded-2xl shadow-2xl">
-            <iframe
-                id="trailer-iframe"
-                src=""
-                data-src="{{ $movie->trailer_embed_url }}?autoplay=1&rel=0"
-                title="{{ $movie->title }} – Official Trailer"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-                class="w-full h-full border-0">
-            </iframe>
-        </div>
-    </div>
-</div>
-@endif
-
-<div class="elit-page pb-24">
-
-    {{-- ═══════════════════════════════════════════════════════
-         SECTION 1: HERO BANNER + TRAILER TRIGGER
-         ═══════════════════════════════════════════════════════ --}}
-    <section class="relative overflow-hidden" aria-label="Movie banner">
-
-        {{-- Banner background (gambar atau gradient fallback) --}}
-        @if ($movie->banner_url)
-            <img
-                src="{{ $movie->banner_url }}"
-                alt="{{ $movie->title }}"
-                class="absolute inset-0 w-full h-full object-cover"
-                aria-hidden="true">
-        @else
-            <div
-                class="absolute inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(196,183,232,.26),transparent_22rem),linear-gradient(135deg,#6a519b_0%,#2a1945_55%,#160d26_100%)]"
-                aria-hidden="true">
+    <div class="min-h-screen bg-[#1c1527] text-white">
+        @if (session('success'))
+            <div class="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
+                <div class="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+                    {{ session('success') }}
+                </div>
             </div>
         @endif
 
-        {{-- Gradient overlay gelap agar teks terbaca --}}
-        <div class="absolute inset-0 bg-gradient-to-b from-[#1b1230]/30 via-[#1b1230]/65 to-[#1b1230]" aria-hidden="true"></div>
+        @if ($errors->any())
+            <div class="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
+                <div class="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                    <div class="font-bold">Ada input yang perlu diperbaiki:</div>
+                    <ul class="mt-2 list-disc space-y-1 pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
 
-        {{-- Konten hero --}}
-        <div class="elit-shell relative">
+        <section class="relative min-h-[420px] overflow-hidden sm:min-h-[500px]">
+            <img src="{{ $banner }}" alt="{{ $movie->title }} banner" class="absolute inset-0 h-full w-full object-cover object-top brightness-[.55] saturate-[1.18]">
+            <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(18,17,42,.84)_0%,rgba(18,17,42,.34)_50%,rgba(28,21,39,.82)_100%)]"></div>
+            <div class="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#1c1527]/80 to-[#1c1527]"></div>
 
-            {{-- === Area Banner Utama (klik untuk buka trailer) === --}}
-            @if ($movie->trailer_embed_url)
+            @if ($trailerEmbedUrl)
                 <button
-                    id="trailer-open"
-                    class="group relative block w-full overflow-hidden rounded-b-2xl cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
-                    aria-label="Play trailer for {{ $movie->title }}"
-                    title="Watch Trailer">
-
-                    {{-- Spacer untuk tinggi banner --}}
-                    <div class="aspect-[21/9] sm:aspect-[21/8] w-full"></div>
-
-                    {{-- Overlay play button di tengah --}}
-                    <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 transition-all duration-300">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/15 border-2 border-white/40 flex items-center justify-center group-hover:bg-white/25 group-hover:scale-105 transition-all duration-300 shadow-2xl backdrop-blur-sm">
-                            <i class="bi bi-play-fill text-white text-3xl sm:text-4xl ml-1"></i>
-                        </div>
-                        <span class="text-white/80 text-xs font-semibold tracking-widest uppercase">Watch Trailer</span>
-                    </div>
+                    type="button"
+                    data-open-trailer
+                    data-trailer-src="{{ $trailerEmbedUrl }}"
+                    class="absolute left-1/2 top-1/2 z-10 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-white/15 text-white shadow-[0_0_60px_rgba(255,255,255,.16)] backdrop-blur-md transition hover:scale-110 hover:bg-white/25 focus:outline-none focus:ring-4 focus:ring-white/30 sm:h-24 sm:w-24"
+                    aria-label="Play trailer {{ $movie->title }}"
+                >
+                    <i class="bi bi-play-fill translate-x-0.5 text-5xl sm:text-6xl"></i>
                 </button>
-            @else
-                {{-- Jika tidak ada trailer, banner hanya jadi spacer visual --}}
-                <div class="aspect-[21/9] sm:aspect-[21/8] w-full"></div>
             @endif
+        </section>
 
-            {{-- === Detail Film (poster + info teks) === --}}
-            <div class="relative -mt-24 sm:-mt-32 pb-10 grid gap-6 md:gap-8 md:grid-cols-[13rem_minmax(0,1fr)] lg:grid-cols-[15rem_minmax(0,1fr)]">
-
-                {{-- Kolom Kiri: Poster --}}
-                <div class="hidden md:block">
-                    <div class="rounded-xl overflow-hidden shadow-2xl ring-1 ring-violet-200/10">
-                        @if ($movie->poster_url)
-                            <img
-                                src="{{ $movie->poster_url }}"
-                                alt="Poster {{ $movie->title }}"
-                                class="w-full object-cover aspect-[2/3]">
-                        @else
-                            <div class="poster-placeholder aspect-[2/3] w-full">
-                                <span>{{ str($movie->title)->limit(24) }}</span>
-                            </div>
-                        @endif
-                    </div>
+        <section class="relative z-10 -mt-28 pb-10">
+            <div class="mx-auto flex max-w-5xl flex-col gap-6 px-4 sm:px-6 md:flex-row md:items-start lg:px-8">
+                <div class="mx-auto w-36 shrink-0 md:mx-0 md:w-[130px]">
+                    <img src="{{ $poster }}" alt="{{ $movie->title }} poster" class="h-52 w-full rounded-xl border-2 border-[#7a669f]/25 object-cover shadow-[0_18px_45px_rgba(0,0,0,.75)] md:h-[190px]">
                 </div>
 
-                {{-- Kolom Kanan: Info film --}}
-                <div class="pt-4 sm:pt-8">
+                <div class="min-w-0 flex-1 rounded-2xl border border-white/5 bg-[#1c1527]/72 p-5 shadow-[0_18px_55px_rgba(0,0,0,.24)] backdrop-blur-sm md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div>
+                            <a href="{{ url()->previous() }}" class="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#b39ddb] hover:text-[#f1c40f]">
+                                <i class="bi bi-arrow-left"></i> Back
+                            </a>
+                            <h1 class="text-3xl font-black uppercase leading-tight tracking-wide text-white sm:text-4xl">
+                                {{ $movie->title }}
+                                @if ($movie->release_year)
+                                    <span class="text-xl font-normal text-white/60 sm:text-2xl">({{ $movie->release_year }})</span>
+                                @endif
+                            </h1>
 
-                    {{-- Judul + Tahun --}}
-                    <h1 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white leading-tight">
-                        {{ $movie->title }}
-                        @if ($movie->release_year)
-                            <span class="text-violet-300/70 font-extrabold">({{ $movie->release_year }})</span>
-                        @endif
-                    </h1>
+                            <div class="mt-3 flex flex-wrap gap-2 text-xs text-[#a9a2b8]">
+                                @if ($movie->release_year)
+                                    <span>{{ $movie->release_year }}</span>
+                                @endif
+                                @if ($movie->duration_minutes)
+                                    <span>&middot;</span>
+                                    <span>Duration : {{ $movie->duration_formatted }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
 
-                    {{-- Meta: tahun, durasi, genre tags --}}
-                    <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                    @if ($movie->directors->isNotEmpty())
+                        <div class="mt-4 text-sm text-[#a9a2b8]">
+                            <span class="font-semibold text-white/85">Director{{ $movie->directors->count() > 1 ? 's' : '' }}:</span>
+                            {{ $movie->directors->pluck('name')->join(', ') }}
+                        </div>
+                    @endif
 
-                        @if ($movie->release_year)
-                            <span class="text-violet-200/75 font-semibold">{{ $movie->release_year }}</span>
-                            <span class="text-violet-200/30">·</span>
-                        @endif
-
-                        <span class="text-violet-200/75 font-semibold flex items-center gap-1">
-                            <i class="bi bi-clock text-xs"></i>
-                            {{ $movie->duration_formatted }}
-                        </span>
-
-                        @if ($movie->genres->isNotEmpty())
-                            <span class="text-violet-200/30">·</span>
+                    @if ($movie->genres->isNotEmpty())
+                        <div class="mt-4 flex flex-wrap gap-2">
                             @foreach ($movie->genres as $genre)
-                                <span class="rounded-full bg-violet-200/15 border border-violet-200/25 px-3 py-0.5 text-xs font-bold text-violet-200/90">
+                                <span class="rounded-full border border-[#7a669f] bg-[#7a669f]/25 px-3 py-1 text-[0.68rem] font-extrabold uppercase tracking-wider text-[#d6c6ff]">
                                     {{ $genre->name }}
                                 </span>
                             @endforeach
-                        @endif
-                    </div>
+                        </div>
+                    @endif
 
-                    {{-- Sinopsis --}}
-                    <p class="mt-4 max-w-2xl text-sm leading-7 text-white/75 font-medium">
-                        {{ $movie->description ?: 'Belum ada deskripsi untuk film ini.' }}
+                    <p class="mt-5 max-w-3xl text-sm leading-7 text-[#c9c2d8]">
+                        {{ $movie->description ?: 'Belum ada deskripsi film.' }}
                     </p>
 
-                    {{-- Rating rata-rata --}}
-                    <div class="mt-5 inline-flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3">
-                        <span class="text-3xl font-black text-white tabular-nums">
-                            {{ number_format((float) $movie->average_score, 1) }}
-                        </span>
+                    <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <div class="flex items-center gap-0.5 text-amber-400 text-base">
-                                @foreach ($movie->average_score_star_icons as $icon)
-                                    <i class="bi {{ $icon }}"></i>
-                                @endforeach
-                            </div>
-                            <p class="text-[11px] text-violet-200/55 font-semibold mt-0.5">
-                                Average Rating
-                            </p>
+                            @if ($averageScore > 0)
+                                <div class="flex items-center gap-3">
+                                    <span class="text-4xl font-black leading-none text-white">{{ number_format($averageScore, 1) }}</span>
+                                    <span class="flex flex-col gap-1">
+                                        <span class="text-sm text-[#f1c40f]">
+                                            @foreach ($movie->average_score_star_icons as $icon)
+                                                <i class="bi {{ $icon }}"></i>
+                                            @endforeach
+                                        </span>
+                                        <span class="text-xs text-[#a9a2b8]">{{ $ratingCount }} rating{{ $ratingCount === 1 ? '' : 's' }}</span>
+                                    </span>
+                                </div>
+                            @else
+                                <span class="text-sm text-[#a9a2b8]">No ratings yet</span>
+                            @endif
                         </div>
-                    </div>
 
-                    {{-- Watchlist & tombol navigasi --}}
-                    <div class="mt-5 flex flex-wrap items-center gap-3">
-
-                        {{-- Watchlist (hanya untuk user yang login) --}}
                         @auth
-                            <form
-                                method="POST"
-                                action="{{ route('watchlist.store', $movie) }}"
-                                class="flex flex-wrap items-center gap-2">
+                            <form method="POST" action="{{ route('watchlist.store', $movie) }}" class="flex flex-wrap items-center gap-2">
                                 @csrf
-
-                                {{-- Status label --}}
-                                <span class="text-xs font-semibold text-violet-200/70">
-                                    {{ $userWatchlist ? '✓ Already in Watch List' : 'Add To Watch List' }}
-                                </span>
-
-                                {{-- Dropdown status --}}
-                                <select
-                                    name="status"
-                                    class="elit-select w-auto min-w-40 px-3 py-1.5 text-xs font-black"
-                                    onchange="this.form.submit()">
-                                    <option value="plan_to_watch" @selected(($userWatchlist?->status ?? '') === 'plan_to_watch')>
-                                        Plan To Watch
-                                    </option>
-                                    <option value="watching" @selected(($userWatchlist?->status ?? '') === 'watching')>
-                                        Watching
-                                    </option>
-                                    <option value="completed" @selected(($userWatchlist?->status ?? '') === 'completed')>
-                                        Completed
-                                    </option>
+                                <select name="status" class="rounded-lg border border-[#7a669f] bg-[#312a4a] px-3 py-2 text-sm text-white focus:border-[#a855f7] focus:outline-none focus:ring-[#a855f7]">
+                                    <option value="plan_to_watch" @selected($selectedStatus === 'plan_to_watch')>Plan to Watch</option>
+                                    <option value="watching" @selected($selectedStatus === 'watching')>Watching</option>
+                                    <option value="completed" @selected($selectedStatus === 'completed')>Completed</option>
                                 </select>
-
-                                <button type="submit" class="elit-btn py-1.5 px-3 text-xs">
-                                    <i class="bi bi-check-lg mr-1"></i>Save
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-[#7a669f] px-4 py-2 text-sm font-bold text-[#d6c6ff] transition hover:bg-[#7a669f] hover:text-white">
+                                    <i class="bi {{ $userWatchlist ? 'bi-bookmark-fill' : 'bi-bookmark-plus' }}"></i>
+                                    {{ $userWatchlist ? 'Update Watchlist' : 'Add To Watch List' }}
                                 </button>
                             </form>
                         @else
-                            <a href="{{ route('login') }}" class="elit-ghost-btn gap-1.5">
-                                <i class="bi bi-plus-lg"></i> Add To Watch List
+                            <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-lg border border-[#7a669f] px-4 py-2 text-sm font-bold text-[#d6c6ff] transition hover:bg-[#7a669f] hover:text-white">
+                                Add To Watch List <i class="bi bi-plus-lg"></i>
                             </a>
                         @endauth
-
-                        {{-- Tombol scroll to sections --}}
-                        <a href="#cast" class="elit-ghost-btn gap-1.5 text-xs">
-                            <i class="bi bi-people"></i> Cast
-                        </a>
-                        <a href="#reviews" class="elit-ghost-btn gap-1.5 text-xs">
-                            <i class="bi bi-chat-square-text"></i> Reviews
-                        </a>
                     </div>
-
-                </div>{{-- /kolom kanan --}}
-            </div>{{-- /grid detail --}}
-        </div>{{-- /elit-shell --}}
-    </section>
-    {{-- ═══════════════════════════════════════════════════════ END SECTION 1 ═════ --}}
-
-
-    {{-- ═══════════════════════════════════════════════════════
-         MAIN CONTENT CONTAINER
-         ═══════════════════════════════════════════════════════ --}}
-    <div class="elit-shell mt-12 space-y-14">
-
-
-        {{-- ═══════════════════════════════════════════════════
-             SECTION 2: CAST & CREW (horizontal scroll)
-             ═══════════════════════════════════════════════════ --}}
-        <section id="cast" aria-labelledby="cast-heading">
-
-            {{-- Section header --}}
-            <div class="flex items-end justify-between mb-6">
-                <h2 id="cast-heading" class="elit-section-title">Cast & Crew</h2>
-                @if ($movie->actors->count() + $movie->directors->count() > 6)
-                    <span class="text-xs text-violet-300/50 font-semibold">Scroll →</span>
-                @endif
-            </div>
-
-            {{-- Horizontal scroll strip --}}
-            <div class="flex gap-6 overflow-x-auto pb-4 scroll-smooth"
-                 style="scrollbar-width: thin; scrollbar-color: rgba(196,183,232,.3) transparent;">
-
-                {{-- Directors dahulu --}}
-                @foreach ($movie->directors as $director)
-                    @include('movies.partials.cast-card', [
-                        'person' => $director,
-                        'role'   => 'Director',
-                    ])
-                @endforeach
-
-                {{-- Actors --}}
-                @foreach ($movie->actors as $actor)
-                    @include('movies.partials.cast-card', [
-                        'person' => $actor,
-                        'role'   => $actor->pivot->role_name ?: 'Cast',
-                    ])
-                @endforeach
-
-                {{-- Empty state --}}
-                @if ($movie->directors->isEmpty() && $movie->actors->isEmpty())
-                    <p class="text-violet-200/50 text-sm font-medium py-8">
-                        Belum ada data cast & crew untuk film ini.
-                    </p>
-                @endif
-
+                </div>
             </div>
         </section>
-        {{-- ═══════════════════════════════════════════════════ END SECTION 2 ═════ --}}
 
+        @if ($movie->actors->isNotEmpty() || $movie->directors->isNotEmpty())
+            <section class="mx-auto mb-10 max-w-5xl px-4 sm:px-6 lg:px-8">
+                <h2 class="mb-4 flex items-center gap-2 border-b border-[#7a669f]/25 pb-3 text-base font-black tracking-wide text-white">
+                    <i class="bi bi-people-fill"></i> Cast &amp; Crew
+                </h2>
 
-        {{-- ═══════════════════════════════════════════════════
-             SECTION 3: RATING & REVIEW FORM
-             ═══════════════════════════════════════════════════ --}}
-        <section
-            id="my-rating"
-            class="border-t border-violet-200/10 pt-10"
-            aria-labelledby="my-rating-heading">
+                <div class="flex items-center gap-3">
+                    <div id="castScrollRow" class="flex flex-1 gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        @foreach ($movie->directors as $director)
+                            <article class="min-w-[100px] max-w-[100px] overflow-hidden rounded-xl border border-[#7a669f]/25 bg-[#2f2543]">
+                                @if ($director->photo_url)
+                                    <img src="{{ $director->photo_url }}" alt="{{ $director->name }}" class="h-[110px] w-full object-cover">
+                                @else
+                                    <div class="flex h-[110px] w-full items-center justify-center bg-[#312a4a] text-2xl font-black text-[#d6c6ff]">
+                                        {{ mb_strtoupper(mb_substr($director->name, 0, 2)) }}
+                                    </div>
+                                @endif
+                                <div class="p-2">
+                                    <div class="text-xs font-extrabold leading-snug text-white">{{ $director->name }}</div>
+                                    <div class="mt-1 text-[0.68rem] text-[#a9a2b8]">Director</div>
+                                </div>
+                            </article>
+                        @endforeach
 
-            <h2 id="my-rating-heading" class="elit-section-title mb-6">My Rating & Review</h2>
+                        @foreach ($movie->actors as $actor)
+                            <article class="min-w-[100px] max-w-[100px] overflow-hidden rounded-xl border border-[#7a669f]/25 bg-[#2f2543]">
+                                @if ($actor->photo_url)
+                                    <img src="{{ $actor->photo_url }}" alt="{{ $actor->name }}" class="h-[110px] w-full object-cover">
+                                @else
+                                    <div class="flex h-[110px] w-full items-center justify-center bg-[#312a4a] text-2xl font-black text-[#d6c6ff]">
+                                        {{ mb_strtoupper(mb_substr($actor->name, 0, 2)) }}
+                                    </div>
+                                @endif
+                                <div class="p-2">
+                                    <div class="text-xs font-extrabold leading-snug text-white">{{ $actor->name }}</div>
+                                    @if ($actor->pivot?->role_name)
+                                        <div class="mt-1 text-[0.68rem] text-[#a9a2b8]">{{ $actor->pivot->role_name }}</div>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                    <button type="button" data-cast-next class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#7a669f]/25 bg-[#312a4a] text-white transition hover:bg-[#7a669f]" aria-label="Scroll cast">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </section>
+        @endif
 
-            <div class="grid gap-6 md:grid-cols-2 max-w-3xl">
+        <section class="mx-auto mb-10 max-w-5xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-4 flex items-center gap-2 border-b border-[#7a669f]/25 pb-3 text-base font-black tracking-wide text-white">
+                <i class="bi bi-chat-right-text"></i>
+                Reviews
+                <span class="text-sm font-normal text-[#a9a2b8]">({{ $movie->reviews->count() }})</span>
+            </h2>
 
-                @auth
-
-                    {{-- === A. Rating Picker === --}}
-                    <div class="rounded-2xl border border-violet-200/15 bg-white/[.04] p-6">
-                        <p class="text-xs font-bold text-violet-200/60 uppercase tracking-widest mb-3">
-                            Your Rating
-                        </p>
-
-                        <form
-                            id="rating-form"
-                            method="POST"
-                            action="{{ route('movies.ratings.store', $movie) }}">
-                            @csrf
-
-                            {{-- Star picker interaktif --}}
-                            <div class="flex items-center gap-1 text-3xl" id="star-picker" role="group" aria-label="Rate this movie">
-                                @for ($score = 1; $score <= 5; $score++)
-                                    <label
-                                        class="cursor-pointer transition-transform duration-150 hover:scale-110"
-                                        for="star-{{ $score }}"
-                                        title="{{ $score }} star{{ $score > 1 ? 's' : '' }}">
-                                        <input
-                                            type="radio"
-                                            id="star-{{ $score }}"
-                                            name="score"
-                                            value="{{ $score }}"
-                                            class="sr-only"
-                                            @checked((int)($userRating?->score ?? 0) === $score)
-                                            onchange="this.form.submit()">
-                                        <i class="bi {{ (int)($userRating?->score ?? 0) >= $score ? 'bi-star-fill text-amber-400' : 'bi-star text-violet-300/40' }} select-none pointer-events-none"></i>
-                                    </label>
-                                @endfor
+            @forelse ($movie->reviews as $index => $review)
+                <article class="mb-4 rounded-2xl border border-[#7a669f]/25 bg-[#2f2543] p-4 shadow-[0_14px_30px_rgba(0,0,0,.18)]" style="animation-delay: {{ $index * 0.07 }}s">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#7a669f] bg-[#312a4a] text-sm font-extrabold uppercase text-[#d6c6ff]">
+                                @if ($review->user?->profile_photo_url)
+                                    <img src="{{ $review->user->profile_photo_url }}" alt="{{ $review->user->username }}" class="h-full w-full object-cover">
+                                @else
+                                    {{ mb_strtoupper(mb_substr($review->user->username ?? $review->user->name ?? 'U', 0, 1)) }}
+                                @endif
                             </div>
+                            <div>
+                                <div class="text-sm font-bold text-white">{{ $review->user->username ?? $review->user->name }}</div>
+                                <div class="text-xs text-[#a9a2b8]">{{ optional($review->created_at)->format('j/n/Y') }}</div>
+                            </div>
+                        </div>
+                        <span class="rounded-full px-2 py-1 text-xs font-semibold text-[#a9a2b8]">
+                            <i class="bi bi-heart"></i> {{ $review->likes_count ?? 0 }}
+                        </span>
+                    </div>
 
-                            @if ($userRating)
-                                <p class="mt-2 text-xs text-violet-200/50 font-medium">
-                                    Your current rating: <strong class="text-violet-200">{{ $userRating->score }}/5</strong>
-                                </p>
-                            @else
-                                <p class="mt-2 text-xs text-violet-200/40 font-medium">
-                                    Click a star to rate this film.
-                                </p>
-                            @endif
+                    <p class="mt-4 text-sm leading-7 text-[#d1cde0]">{!! nl2br(e($review->review_text)) !!}</p>
+                </article>
+            @empty
+                <p class="text-sm text-[#a9a2b8]">No reviews yet. Be the first!</p>
+            @endforelse
+        </section>
+
+        <section class="border-t border-[#7a669f]/25 bg-[#312a4a]/45 px-4 py-10 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-5xl">
+                @auth
+                    <div class="text-xs font-black uppercase tracking-[0.2em] text-[#a855f7]">My Rating</div>
+                    <h2 class="mt-1 text-2xl font-black uppercase text-white">
+                        {{ $movie->title }} @if ($movie->release_year) ({{ $movie->release_year }}) @endif
+                    </h2>
+                    <p class="mt-2 text-sm font-semibold text-white">What did you think of it?</p>
+                    <p class="mt-1 text-xs text-[#a9a2b8]">Pick a star rating and leave a comment</p>
+
+                    <div class="mt-5 rounded-2xl border border-[#7a669f]/25 bg-[#2f2543] p-5">
+                        <form method="POST" action="{{ route('movies.ratings.store', $movie) }}" class="flex flex-wrap items-center gap-4">
+                            @csrf
+                            <span class="text-sm text-[#a9a2b8]">Your rating:</span>
+                            <div class="flex items-center gap-1" data-star-rating data-current="{{ $currentUserScore }}">
+                                @for ($score = 1; $score <= 5; $score++)
+                                    <button type="button" data-star-value="{{ $score }}" class="text-3xl transition hover:scale-110 {{ $currentUserScore >= $score ? 'text-[#f1c40f]' : 'text-[#4a4060]' }}" aria-label="Rate {{ $score }} stars">
+                                        <i class="bi {{ $currentUserScore >= $score ? 'bi-star-fill' : 'bi-star' }}"></i>
+                                    </button>
+                                @endfor
+                                <input type="hidden" name="score" id="scoreInput" value="{{ $currentUserScore ?: '' }}" required>
+                            </div>
+                            <button type="submit" class="rounded-lg bg-[#7a669f] px-5 py-2 text-sm font-bold text-white transition hover:scale-105 hover:bg-[#a855f7]">
+                                {{ $userRating ? 'Update Rating' : 'Rate' }}
+                            </button>
                         </form>
                     </div>
 
-                    {{-- === B. Review Form === --}}
-                    <div class="rounded-2xl border border-violet-200/15 bg-white/[.04] p-6">
-                        <p class="text-xs font-bold text-violet-200/60 uppercase tracking-widest mb-3">
-                            Your Review
-                        </p>
-
-                        <form
-                            method="POST"
-                            action="{{ route('movies.reviews.store', $movie) }}">
+                    <div class="mt-4 rounded-2xl border border-[#7a669f]/25 bg-[#2f2543] p-5">
+                        <form method="POST" action="{{ route('movies.reviews.store', $movie) }}">
                             @csrf
-
-                            <textarea
-                                name="review_text"
-                                rows="4"
-                                class="elit-textarea w-full px-4 py-3 text-sm resize-none"
-                                placeholder="What did you think of {{ $movie->title }}? Share your thoughts…">{{ old('review_text', $userReview?->review_text ?? '') }}</textarea>
-
-                            <div class="mt-3 flex justify-end">
-                                <button type="submit" class="elit-btn gap-2">
-                                    <i class="bi bi-send"></i>
+                            <textarea name="review_text" rows="4" required placeholder="Leave a comment..." class="w-full resize-none rounded-xl border border-transparent bg-transparent px-0 text-sm leading-7 text-white placeholder:text-[#a9a2b8] focus:border-transparent focus:outline-none focus:ring-0">{{ old('review_text', $userReview?->review_text ?? '') }}</textarea>
+                            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#7a669f]/25 pt-4">
+                                <span class="text-xs text-[#a9a2b8]">{{ $userReview ? 'Editing your review' : 'Writing a new review' }}</span>
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#7a669f] px-5 py-2 text-sm font-bold text-white transition hover:scale-105 hover:bg-[#a855f7]">
+                                    <i class="bi bi-send-fill"></i>
                                     {{ $userReview ? 'Update Review' : 'Post Review' }}
                                 </button>
                             </div>
                         </form>
                     </div>
-
                 @else
-
-                    {{-- === Kondisi belum login === --}}
-                    <div class="col-span-2 rounded-2xl border border-dashed border-violet-200/25 bg-white/[.03] p-8 text-center">
-                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-violet-300/10 mb-4">
-                            <i class="bi bi-lock text-2xl text-violet-300/60"></i>
-                        </div>
-                        <h3 class="text-base font-black text-white mb-1">Login to Rate & Review</h3>
-                        <p class="text-sm text-violet-200/60 font-medium mb-5">
-                            Silakan login untuk memberikan rating dan menulis review untuk film ini.
-                        </p>
-                        <a href="{{ route('login') }}" class="elit-btn gap-2 px-6">
-                            <i class="bi bi-box-arrow-in-right"></i> Login Sekarang
-                        </a>
+                    <div class="rounded-2xl border border-[#7a669f]/25 bg-[#2f2543] p-5 text-sm text-[#a9a2b8]">
+                        <i class="bi bi-star-fill mr-2 text-[#f1c40f]"></i>
+                        <a href="{{ route('login') }}" class="font-bold text-[#d6c6ff] hover:text-[#f1c40f]">Log in</a>
+                        to rate, review, or add this movie to your watchlist.
                     </div>
-
                 @endauth
-
             </div>
         </section>
-        {{-- ══════════════════════════════════════════════════ END SECTION 3 ══════ --}}
 
-
-        {{-- ═══════════════════════════════════════════════════
-             SECTION 4: DAFTAR REVIEW
-             ═══════════════════════════════════════════════════ --}}
-        <section id="reviews" class="border-t border-violet-200/10 pt-10" aria-labelledby="reviews-heading">
-
-            {{-- Section header --}}
-            <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
-                <h2 id="reviews-heading" class="elit-section-title">
-                    Reviews
-                    @if ($movie->reviews->isNotEmpty())
-                        <span class="ml-2 text-lg text-violet-300/50 font-semibold">
-                            ({{ $movie->reviews->count() }})
-                        </span>
-                    @endif
-                </h2>
-            </div>
-
-            {{-- Daftar review --}}
-            <div class="space-y-4">
-
-                @forelse ($movie->reviews as $review)
-                    @include('movies.partials.review-item', ['review' => $review])
-                @empty
-                    {{-- Empty state --}}
-                    <div class="rounded-2xl border border-dashed border-violet-200/20 bg-white/[.02] p-10 text-center">
-                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-violet-300/10 mb-4">
-                            <i class="bi bi-chat-square text-2xl text-violet-300/40"></i>
-                        </div>
-                        <p class="text-sm font-semibold text-violet-200/55">
-                            Belum ada review untuk film ini. Jadilah yang pertama!
-                        </p>
+        @if ($trailerEmbedUrl)
+            <div id="trailerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Trailer modal">
+                <div class="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#100b18] shadow-2xl">
+                    <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                        <h2 class="text-sm font-bold uppercase tracking-wide text-white">Trailer {{ $movie->title }}</h2>
+                        <button type="button" data-close-trailer class="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20" aria-label="Close trailer modal">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
-                @endforelse
-
-            </div>
-
-            {{-- ═══════════════════════════════════════════════
-                 PAGINATION LINKS
-                 Catatan: jika Anda ingin pagination fungsional, ubah controller
-                 agar reviews di-paginate, lalu ganti $movie->reviews dengan $reviews
-                 dan panggil {{ $reviews->links() }} di sini.
-                 Saat ini reviews di-load sebagai collection langsung dari relasi.
-                 ═══════════════════════════════════════════════
-            --}}
-            {{--
-            @if ($reviews instanceof \Illuminate\Pagination\LengthAwarePaginator && $reviews->hasPages())
-                <div class="mt-8 flex justify-center">
-                    {{ $reviews->links() }}
+                    <div class="aspect-video w-full bg-black">
+                        <iframe
+                            data-trailer-frame
+                            class="h-full w-full"
+                            src=""
+                            title="Trailer {{ $movie->title }}"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
                 </div>
-            @endif
-            --}}
+            </div>
+        @endif
+    </div>
 
-        </section>
-        {{-- ══════════════════════════════════════════════════ END SECTION 4 ══════ --}}
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const castNext = document.querySelector('[data-cast-next]');
+                const castRow = document.getElementById('castScrollRow');
 
+                castNext?.addEventListener('click', function () {
+                    castRow?.scrollBy({ left: 220, behavior: 'smooth' });
+                });
 
-    </div>{{-- /elit-shell --}}
-</div>{{-- /elit-page --}}
+                const ratingWrap = document.querySelector('[data-star-rating]');
+                if (ratingWrap) {
+                    const stars = ratingWrap.querySelectorAll('[data-star-value]');
+                    const input = document.getElementById('scoreInput');
 
+                    function highlight(value) {
+                        stars.forEach(function (button) {
+                            const active = parseInt(button.dataset.starValue, 10) <= value;
+                            const icon = button.querySelector('i');
+                            button.classList.toggle('text-[#f1c40f]', active);
+                            button.classList.toggle('text-[#4a4060]', !active);
+                            icon.classList.toggle('bi-star-fill', active);
+                            icon.classList.toggle('bi-star', !active);
+                        });
+                    }
 
-{{-- ═══════════════════════════════════════════════════════
-     JAVASCRIPT: Trailer Modal & Star Picker Hover Effect
-     ═══════════════════════════════════════════════════════ --}}
-@if ($movie->trailer_embed_url)
-<script>
-(function () {
-    const modal       = document.getElementById('trailer-modal');
-    const openBtn     = document.getElementById('trailer-open');
-    const closeBtn    = document.getElementById('trailer-close');
-    const iframe      = document.getElementById('trailer-iframe');
-    const srcData     = iframe?.dataset.src;
+                    stars.forEach(function (button) {
+                        button.addEventListener('mouseenter', function () {
+                            highlight(parseInt(button.dataset.starValue, 10));
+                        });
 
-    function openModal() {
-        if (!modal) return;
-        // Set src untuk autoplay
-        if (iframe && srcData) iframe.src = srcData;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-    }
+                        button.addEventListener('mouseleave', function () {
+                            highlight(parseInt(input.value || '0', 10));
+                        });
 
-    function closeModal() {
-        if (!modal) return;
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        // Hentikan video dengan mengosongkan src
-        if (iframe) iframe.src = '';
-        document.body.style.overflow = '';
-    }
+                        button.addEventListener('click', function () {
+                            input.value = button.dataset.starValue;
+                            highlight(parseInt(input.value, 10));
+                        });
+                    });
+                }
 
-    openBtn?.addEventListener('click', openModal);
-    closeBtn?.addEventListener('click', closeModal);
+                const modal = document.getElementById('trailerModal');
+                const openButton = document.querySelector('[data-open-trailer]');
+                const iframe = document.querySelector('[data-trailer-frame]');
+                const closeButtons = document.querySelectorAll('[data-close-trailer]');
 
-    // Tutup saat klik di luar konten modal
-    modal?.addEventListener('click', function (e) {
-        if (e.target === modal) closeModal();
-    });
+                function withAutoplay(src) {
+                    if (!src) return '';
+                    return src + (src.includes('?') ? '&' : '?') + 'autoplay=1&rel=0';
+                }
 
-    // Tutup dengan Escape
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeModal();
-    });
-})();
-</script>
-@endif
+                function openTrailerModal() {
+                    if (!modal || !iframe || !openButton) return;
+                    iframe.src = withAutoplay(openButton.dataset.trailerSrc);
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                }
 
-<script>
-/**
- * Star Picker – efek hover interaktif.
- * Saat user hover pada bintang, bintang sebelumnya ikut menyala.
- */
-(function () {
-    const picker = document.getElementById('star-picker');
-    if (!picker) return;
+                function closeTrailerModal() {
+                    if (!modal || !iframe) return;
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    iframe.src = '';
+                    document.body.classList.remove('overflow-hidden');
+                }
 
-    const labels = picker.querySelectorAll('label');
-    const icons  = picker.querySelectorAll('i');
+                openButton?.addEventListener('click', openTrailerModal);
+                closeButtons.forEach(function (button) {
+                    button.addEventListener('click', closeTrailerModal);
+                });
 
-    function highlightUpTo(index) {
-        icons.forEach((icon, i) => {
-            if (i <= index) {
-                icon.className = 'bi bi-star-fill text-amber-400 select-none pointer-events-none';
-            } else {
-                icon.className = 'bi bi-star text-violet-300/40 select-none pointer-events-none';
-            }
-        });
-    }
+                modal?.addEventListener('click', function (event) {
+                    if (event.target === modal) {
+                        closeTrailerModal();
+                    }
+                });
 
-    function resetToChecked() {
-        const checked = picker.querySelector('input[type="radio"]:checked');
-        const checkedVal = checked ? parseInt(checked.value, 10) - 1 : -1;
-        icons.forEach((icon, i) => {
-            if (i <= checkedVal) {
-                icon.className = 'bi bi-star-fill text-amber-400 select-none pointer-events-none';
-            } else {
-                icon.className = 'bi bi-star text-violet-300/40 select-none pointer-events-none';
-            }
-        });
-    }
-
-    labels.forEach((label, index) => {
-        label.addEventListener('mouseenter', () => highlightUpTo(index));
-        label.addEventListener('mouseleave', resetToChecked);
-    });
-})();
-</script>
-
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeTrailerModal();
+                    }
+                });
+            });
+        </script>
+    @endpush
 </x-app-layout>
