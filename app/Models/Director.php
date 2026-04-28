@@ -31,7 +31,7 @@ class Director extends Model
     // Mwtode untuk mendapatkan URL foto
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this -> ResolvesMediaUrls($this->photo_path);
+        return $this -> resolveMediaUrl($this->photo_path);
     }
 
     // Scope untuk mencari sutradara berdasarkan nama
