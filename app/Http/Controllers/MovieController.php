@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Movie;
 use App\Models\Rating;
 use App\Models\Review;
+use App\Models\Watchlist;
 use Illuminate\Http\Request;
-use App\Models\Movie;
 
 class MovieController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $movies = Movie::query()
@@ -31,33 +29,15 @@ class MovieController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Movie $movie)
     {
         $movie->load([
-            'directors:id,name',
-            'actors:id,name',
+            'directors:id,name,photo_path',
+            'actors:id,name,photo_path',
             'genres:id,name',
             'reviews' => function ($query) {
-                $query->with(['user:id,username'])
+                $query->with(['user:id,name,username,profile_photo'])
+                    ->withLikesCount()
                     ->latestFirst();
             },
         ]);
@@ -67,6 +47,7 @@ class MovieController extends Controller
 
         $userRating = null;
         $userReview = null;
+        $userWatchlist = null;
 
         if (auth()->check()) {
             $userId = (int) auth()->id();
@@ -80,13 +61,14 @@ class MovieController extends Controller
                 ->forMovie((int) $movie->id)
                 ->forUser($userId)
                 ->first();
+
+            $userWatchlist = Watchlist::query()
+                ->forMovie((int) $movie->id)
+                ->forUser($userId)
+                ->first();
         }
 
-        return view('movies.movie', [
-            'movie' => $movie,
-            'userRating' => $userRating,
-            'userReview' => $userReview,
-        ]);
+        return view('movies.movie', compact('movie', 'userRating', 'userReview', 'userWatchlist'));
     }
 
     public function storeRating(Request $request, Movie $movie)
@@ -103,7 +85,7 @@ class MovieController extends Controller
             ['score' => (int) $validated['score']]
         );
 
-        return back()->with('status', 'rating-saved');
+        return back()->with('success', 'Rating berhasil disimpan.');
     }
 
     public function storeReview(Request $request, Movie $movie)
@@ -120,30 +102,6 @@ class MovieController extends Controller
             ['review_text' => $validated['review_text']]
         );
 
-        return back()->with('status', 'review-saved');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return back()->with('success', 'Review berhasil disimpan.');
     }
 }

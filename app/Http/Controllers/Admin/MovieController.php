@@ -3,232 +3,198 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Movie;
 use App\Models\Actor;
 use App\Models\Director;
 use App\Models\Genre;
+use App\Models\Movie;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
-
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class MovieController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $search = request('search');
-        $sort = request('sort', 'asc');  
-        
+        $search = $request->string('search')->toString();
+        $sort = $request->string('sort', 'asc')->toString();
+
         $movies = Movie::query()
+            ->with(['genres:id,name', 'directors:id,name'])
+            ->withCount('reviews')
+            ->withRatingsStats()
             ->search($search)
             ->sortByTitle($sort)
             ->paginate(10)
             ->withQueryString();
 
-        // UBAH: Tambahin $search dan $sort ke dalam compact
-        return view("admin.movies.index", compact("movies", "search", "sort"));
+        return view('admin.movies.index', compact('movies', 'search', 'sort'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
-        $genres    = Genre::orderBy('name')->get();
-        $actors    = Actor::orderBy('name')->get();
-        $directors = Director::orderBy('name')->get();
- 
-        return view('admin.movies.create', compact('genres', 'actors', 'directors'));
+        return view('admin.movies.create', $this->formOptions());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title'            => ['required', 'string', 'max:255', 'unique:movies,title'],
-            'description'      => ['nullable', 'string'],
-            'release_year'     => ['required', 'integer', 'min:1888', 'max:' . (date('Y') + 1)],
-            'duration_minutes' => ['required', 'integer', 'min:1'],
-            'trailer_url'      => ['required', 'url', 'max:255'],
-            'poster'           => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'banner'           => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'genres'           => ['required', 'array', 'min:1'],
-            'genres.*'         => ['exists:genres,id'],
-            'directors'        => ['required', 'array', 'min:1'],
-            'directors.*'      => ['exists:directors,id'],
-            'actors'           => ['nullable', 'array'],
-            'actors.*'         => ['exists:actors,id'],
-            'role_names'       => ['nullable', 'array'],
-            'role_names.*'     => ['nullable', 'string', 'max:100'],
-        ]);
- 
-        // Upload poster dan banner
-        $posterPath = $request->file('poster')->store('movies/posters', 'public');
-        $bannerPath = $request->file('banner')->store('movies/banners', 'public');
- 
-        // Buat movie
+        $validated = $this->validateMovie($request);
+
         $movie = Movie::create([
-            'title'            => $validated['title'],
-            'description'      => $validated['description'] ?? null,
-            'release_year'     => $validated['release_year'],
-            'duration_minutes' => $validated['duration_minutes'],
-            'trailer_url'      => $validated['trailer_url'],
-            'poster_path'      => $posterPath,
-            'banner_path'      => $bannerPath,
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'release_year' => $validated['release_year'] ?? null,
+            'duration_minutes' => $validated['duration_minutes'] ?? null,
+            'trailer_url' => $validated['trailer_url'] ?? null,
+            'poster_path' => $this->mediaPathFromRequest($request, 'poster', 'poster_url', 'movies/posters'),
+            'banner_path' => $this->mediaPathFromRequest($request, 'banner', 'banner_url', 'movies/banners'),
         ]);
- 
-        // Sync relasi genre dan director
-        $movie->genres()->sync($validated['genres']);
-        $movie->directors()->sync($validated['directors']);
- 
-        // Sync relasi actor dengan role_name di pivot
-        if (!empty($validated['actors'])) {
-            $actorSync = [];
-            foreach ($validated['actors'] as $index => $actorId) {
-                $actorSync[$actorId] = [
-                    'role_name' => $validated['role_names'][$index] ?? null,
-                ];
-            }
-            $movie->actors()->sync($actorSync);
-        }
- 
+
+        $this->syncRelations($movie, $validated);
+
         return redirect()->route('admin.movies.index')
-            ->with('success', 'Movie created successfully.');
+            ->with('success', 'Movie berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Movie $movies)
+    public function show(Movie $movie): RedirectResponse
     {
-        return view('admin.movies.show', compact('movie'));
+        return redirect()->route('admin.movies.edit', $movie);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Movie $movie): View
     {
-        $genres    = Genre::orderBy('name')->get();
-        $actors    = Actor::orderBy('name')->get();
-        $directors = Director::orderBy('name')->get();
- 
-        // Load relasi yang sudah terpilih
-        $movie->load('genres', 'directors', 'actors');
- 
-        // Buat map actorId => role_name untuk prefill form
-        $selectedActors = $movie->actors->mapWithKeys(function ($actor) {
-            return [$actor->id => $actor->pivot->role_name];
-        });
- 
-        return view('admin.movies.edit', compact(
-            'movie',
-            'genres',
-            'actors',
-            'directors',
-            'selectedActors'
+        $movie->load(['genres:id,name', 'directors:id,name', 'actors:id,name']);
+
+        $selectedActors = $movie->actors->mapWithKeys(fn ($actor) => [
+            $actor->id => $actor->pivot->role_name,
+        ]);
+
+        return view('admin.movies.edit', array_merge(
+            $this->formOptions(),
+            compact('movie', 'selectedActors')
         ));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
- public function update(Request $request, Movie $movie): RedirectResponse
+    public function update(Request $request, Movie $movie): RedirectResponse
     {
-        $validated = $request->validate([
-            'title'            => ['required', 'string', 'max:255', 'unique:movies,title,' . $movie->id],
-            'description'      => ['nullable', 'string'],
-            'release_year'     => ['required', 'integer', 'min:1888', 'max:' . (date('Y') + 1)],
-            'duration_minutes' => ['required', 'integer', 'min:1'],
-            'trailer_url'      => ['nullable', 'url', 'max:255'],
-            'poster'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'banner'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'genres'           => ['required', 'array', 'min:1'],
-            'genres.*'         => ['exists:genres,id'],
-            'directors'        => ['required', 'array', 'min:1'],
-            'directors.*'      => ['exists:directors,id'],
-            'actors'           => ['nullable', 'array'],
-            'actors.*'         => ['exists:actors,id'],
-            'role_names'       => ['nullable', 'array'],
-            'role_names.*'     => ['nullable', 'string', 'max:100'],
-        ]);
- 
-        $posterPath = $movie->poster_path;
-        $bannerPath = $movie->banner_path;
- 
-        // Update poster jika ada file baru
-        if ($request->hasFile('poster')) {
-            Storage::disk('public')->delete($posterPath);
-            $posterPath = $request->file('poster')->store('movies/posters', 'public');
-        }
- 
-        // Update banner jika ada file baru
-        if ($request->hasFile('banner')) {
-            Storage::disk('public')->delete($bannerPath);
-            $bannerPath = $request->file('banner')->store('movies/banners', 'public');
-        }
- 
+        $validated = $this->validateMovie($request, $movie);
+
         $movie->update([
-            'title'            => $validated['title'],
-            'description'      => $validated['description'] ?? null,
-            'release_year'     => $validated['release_year'],
-            'duration_minutes' => $validated['duration_minutes'],
-            'trailer_url'      => $validated['trailer_url'] ?? null,
-            'poster_path'      => $posterPath,
-            'banner_path'      => $bannerPath,
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'release_year' => $validated['release_year'] ?? null,
+            'duration_minutes' => $validated['duration_minutes'] ?? null,
+            'trailer_url' => $validated['trailer_url'] ?? null,
+            'poster_path' => $this->mediaPathFromRequest($request, 'poster', 'poster_url', 'movies/posters', $movie->poster_path),
+            'banner_path' => $this->mediaPathFromRequest($request, 'banner', 'banner_url', 'movies/banners', $movie->banner_path),
         ]);
- 
-        // Sync relasi genre dan director
-        $movie->genres()->sync($validated['genres']);
-        $movie->directors()->sync($validated['directors']);
- 
-        // Sync relasi actor dengan role_name di pivot
-        if (!empty($validated['actors'])) {
-            $actorSync = [];
-            foreach ($validated['actors'] as $index => $actorId) {
-                $actorSync[$actorId] = [
-                    'role_name' => $validated['role_names'][$index] ?? null,
-                ];
-            }
-            $movie->actors()->sync($actorSync);
-        } else {
-            // Jika semua actor dihapus, detach semua
-            $movie->actors()->detach();
-        }
- 
+
+        $this->syncRelations($movie, $validated);
+
         return redirect()->route('admin.movies.index')
-            ->with('success', 'Movie updated successfully.');
+            ->with('success', 'Movie berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Movie $movie): RedirectResponse
     {
-        // Hapus poster dan banner dari storage
-        if ($movie->poster_path) {
-            Storage::disk('public')->delete($movie->poster_path);
-        }
- 
-        if ($movie->banner_path) {
-            Storage::disk('public')->delete($movie->banner_path);
-        }
- 
-        // Lepas semua relasi pivot sebelum hapus
+        $this->deletePublicFile($movie->poster_path);
+        $this->deletePublicFile($movie->banner_path);
+
         $movie->genres()->detach();
         $movie->directors()->detach();
         $movie->actors()->detach();
- 
         $movie->delete();
- 
+
         return redirect()->route('admin.movies.index')
-                         ->with('success', 'Movie deleted successfully.');
+            ->with('success', 'Movie berhasil dihapus.');
+    }
+
+    private function formOptions(): array
+    {
+        return [
+            'genres' => Genre::orderBy('name')->get(),
+            'actors' => Actor::orderBy('name')->get(),
+            'directors' => Director::orderBy('name')->get(),
+        ];
+    }
+
+    private function validateMovie(Request $request, ?Movie $movie = null): array
+    {
+        $movieId = $movie?->id;
+
+        return $request->validate([
+            'title' => ['required', 'string', 'max:150', Rule::unique('movies', 'title')->ignore($movieId)],
+            'description' => ['nullable', 'string'],
+            'release_year' => ['nullable', 'integer', 'min:1888', 'max:' . (date('Y') + 2)],
+            'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'trailer_url' => ['nullable', 'url', 'max:2048'],
+            'poster_url' => ['nullable', 'url', 'max:2048'],
+            'banner_url' => ['nullable', 'url', 'max:2048'],
+            'poster' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'banner' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
+            'genres' => ['nullable', 'array'],
+            'genres.*' => ['exists:genres,id'],
+            'directors' => ['nullable', 'array'],
+            'directors.*' => ['exists:directors,id'],
+            'actors' => ['nullable', 'array'],
+            'actors.*' => ['exists:actors,id'],
+            'role_names' => ['nullable', 'array'],
+            'role_names.*' => ['nullable', 'string', 'max:100'],
+        ]);
+    }
+
+    private function mediaPathFromRequest(Request $request, string $fileField, string $urlField, string $directory, ?string $current = null): ?string
+    {
+        if ($request->hasFile($fileField)) {
+            $this->deletePublicFile($current);
+
+            return $request->file($fileField)->store($directory, 'public');
+        }
+
+        if ($request->filled($urlField)) {
+            $url = trim((string) $request->input($urlField));
+
+            if ($current !== $url) {
+                $this->deletePublicFile($current);
+            }
+
+            return $url;
+        }
+
+        return $current;
+    }
+
+    private function syncRelations(Movie $movie, array $validated): void
+    {
+        $movie->genres()->sync($validated['genres'] ?? []);
+        $movie->directors()->sync($validated['directors'] ?? []);
+
+        $actorSync = [];
+        foreach (($validated['actors'] ?? []) as $actorId) {
+            $actorSync[$actorId] = [
+                'role_name' => $validated['role_names'][$actorId] ?? null,
+            ];
+        }
+
+        $movie->actors()->sync($actorSync);
+    }
+
+    private function deletePublicFile(?string $path): void
+    {
+        if (! $path) {
+            return;
+        }
+
+        $path = trim($path);
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://') || str_starts_with($path, '//')) {
+            return;
+        }
+
+        $path = ltrim($path, '/');
+        $path = str_starts_with($path, 'storage/') ? substr($path, 8) : $path;
+
+        Storage::disk('public')->delete($path);
     }
 }
