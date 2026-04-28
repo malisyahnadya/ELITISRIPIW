@@ -11,35 +11,50 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $popularMovies = Movie::query()
-            ->select(['id', 'title', 'description', 'release_year', 'duration_minutes', 'poster_path', 'banner_path'])
+        $currentMonth = (int) now()->month;
+        $currentYear = (int) now()->year;
+        $monthName = strtoupper(now()->format('F'));
+
+        $heroMovies = Movie::query()
+            ->select(['id', 'title', 'description', 'release_year', 'duration_minutes', 'poster_path', 'banner_path', 'trailer_url'])
             ->withRatingsStats()
-            ->orderByDesc('ratings_count')
-            ->orderByDesc('ratings_avg_score')
-            ->limit(6)
+            ->withCount([
+                'ratings as month_ratings_count' => fn ($query) => $query
+                    ->whereMonth('created_at', $currentMonth)
+                    ->whereYear('created_at', $currentYear),
+            ])
+            ->withAvg([
+                'ratings as month_avg_score' => fn ($query) => $query
+                    ->whereMonth('created_at', $currentMonth)
+                    ->whereYear('created_at', $currentYear),
+            ], 'score')
+            ->whereHas('ratings', fn ($query) => $query
+                ->whereMonth('created_at', $currentMonth)
+                ->whereYear('created_at', $currentYear))
+            ->orderByDesc('month_avg_score')
+            ->orderByDesc('month_ratings_count')
+            ->take(5)
             ->get();
 
-        $featuredReview = Review::query()
-            ->with([
-                'movie' => fn ($query) => $query
-                    ->select(['id', 'title', 'description', 'release_year', 'duration_minutes', 'poster_path', 'banner_path'])
-                    ->withRatingsStats(),
-                'user:id,name,username,profile_photo',
-            ])
-            ->withLikesCount()
-            ->orderByDesc('likes_count')
-            ->latestFirst()
-            ->first();
+        if ($heroMovies->isEmpty()) {
+            $heroMovies = Movie::query()
+                ->select(['id', 'title', 'description', 'release_year', 'duration_minutes', 'poster_path', 'banner_path', 'trailer_url'])
+                ->withRatingsStats()
+                ->orderByDesc('ratings_avg_score')
+                ->orderByDesc('ratings_count')
+                ->take(5)
+                ->get();
+        }
 
         $recommendedMovies = Movie::query()
             ->forHomeCard()
             ->withCount('reviews')
             ->orderByRaw('(ratings_count + reviews_count) DESC')
             ->orderByDesc('ratings_avg_score')
-            ->take(10)
+            ->take(12)
             ->get();
 
-        $hasMoreRecommended = Movie::count() > 10;
+        $hasMoreRecommended = Movie::count() > 12;
 
         $userWatchlist = collect();
         $hasMoreWatchlist = false;
@@ -49,10 +64,10 @@ class HomeController extends Controller
                 ->forUser((int) Auth::id())
                 ->with(['movie' => fn ($query) => $query->forHomeCard()])
                 ->latest('updated_at')
-                ->take(3)
+                ->take(10)
                 ->get();
 
-            $hasMoreWatchlist = Watchlist::where('user_id', Auth::id())->count() > 3;
+            $hasMoreWatchlist = Watchlist::where('user_id', Auth::id())->count() > 10;
         }
 
         $latestReviews = Review::query()
@@ -61,13 +76,14 @@ class HomeController extends Controller
                 'movie:id,title,release_year,poster_path,duration_minutes',
             ])
             ->withLikesCount()
+            ->orderByDesc('likes_count')
             ->latestFirst()
-            ->take(6)
+            ->take(5)
             ->get();
 
         return view('home', compact(
-            'popularMovies',
-            'featuredReview',
+            'heroMovies',
+            'monthName',
             'recommendedMovies',
             'userWatchlist',
             'latestReviews',
