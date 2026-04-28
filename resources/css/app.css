@@ -1,3 +1,181 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --elit-bg: #1b1230;
+    --elit-bg-deep: #140d24;
+    --elit-panel: #3a2860;
+    --elit-panel-soft: #4b3775;
+    --elit-line: #c8b7ee;
+    --elit-pill: #c4b7e8;
+}
+
+html {
+    background: var(--elit-bg-deep);
+}
+
+body {
+    background: var(--elit-bg-deep);
+}
+
+.elit-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 15% 0%, rgba(126, 91, 190, 0.32), transparent 28rem),
+        linear-gradient(180deg, #22143b 0%, #180f2b 55%, #150d25 100%);
+    color: #fff;
+}
+
+.elit-shell {
+    width: min(100% - 2rem, 64rem);
+    margin-inline: auto;
+}
+
+.elit-section-title {
+    border-bottom: 3px solid rgba(210, 197, 242, 0.85);
+    padding-bottom: 0.7rem;
+    font-size: clamp(1.2rem, 2.2vw, 1.75rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: #fff;
+}
+
+.elit-panel {
+    border: 1px solid rgba(210, 197, 242, 0.16);
+    background: rgba(58, 40, 96, 0.88);
+    box-shadow: 0 24px 60px rgba(7, 3, 18, 0.28);
+}
+
+.movie-card {
+    overflow: hidden;
+    border-radius: 0.9rem;
+    background: linear-gradient(180deg, rgba(74, 55, 117, 0.95), rgba(54, 38, 91, 0.96));
+    padding: 0.48rem;
+    box-shadow: 0 16px 38px rgba(10, 4, 24, 0.28);
+}
+
+.movie-card-horizontal {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.5rem;
+    border-bottom: 2px solid rgba(210, 197, 242, 0.75);
+    padding: 1rem 0;
+}
+
+.poster-placeholder {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 0.8rem;
+    background:
+        radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.3), transparent 4rem),
+        linear-gradient(155deg, #a8e6ef 0%, #764f9e 48%, #2e214d 100%);
+    color: #fff;
+    font-weight: 900;
+    line-height: 1.05;
+    padding: 0.8rem;
+    text-align: center;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
+.review-card {
+    border-radius: 1.25rem;
+    background: rgba(62, 43, 101, 0.95);
+    box-shadow: 0 22px 44px rgba(10, 4, 24, 0.28);
+    padding: 1.2rem;
+}
+
+.elit-input,
+.elit-select,
+.elit-textarea {
+    width: 100%;
+    border-radius: 999px;
+    border: 2px solid rgba(210, 197, 242, 0.85);
+    background: rgba(28, 17, 48, 0.45);
+    color: #fff;
+    outline: none;
+}
+
+.elit-textarea {
+    border-radius: 1rem;
+}
+
+.elit-input:focus,
+.elit-select:focus,
+.elit-textarea:focus {
+    border-color: #fff;
+    box-shadow: 0 0 0 4px rgba(196, 183, 232, 0.18);
+}
+
+.elit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #c4b7e8;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.78rem;
+    font-weight: 900;
+    color: #25163d;
+    transition: all 160ms ease;
+}
+
+.elit-btn:hover {
+    transform: translateY(-1px);
+    background: #fff;
+}
+
+.elit-ghost-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(210, 197, 242, 0.75);
+    padding: 0.55rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #fff;
+    transition: all 160ms ease;
+}
+
+.elit-ghost-btn:hover {
+    background: rgba(210, 197, 242, 0.16);
+}
+
+@media (max-width: 640px) {
+    .movie-card-horizontal {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .movie-card-horizontal > div:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+.line-clamp-6 {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Custom thin scrollbar for horizontal cast strip */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: rgba(196, 183, 232, 0.25);
+    border-radius: 999px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(196, 183, 232, 0.5);
+}
