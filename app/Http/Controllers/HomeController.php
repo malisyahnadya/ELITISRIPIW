@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
+    // Menampilkan halaman utama dengan daftar film unggulan, rekomendasi, watchlist pengguna, dan ulasan terbaru
     public function index()
     {
         $currentMonth = (int) now()->month;

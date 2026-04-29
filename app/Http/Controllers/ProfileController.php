@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 class ProfileController extends Controller
 {
-    
-
+    // Menampilkan halaman profil pengguna dengan informasi dasar, daftar film di watchlist, ulasan yang sudah dibuat, dan rating yang sudah diberikan
     public function index(): View
     {
         $user = Auth::user();
@@ -25,6 +24,7 @@ class ProfileController extends Controller
         return view('profile.index', compact('user', 'watchlist', 'reviewedMovies', 'ratedMovies'));
     }
 
+    // Menampilkan halaman edit profil
     public function edit(): View
     {
         $user = Auth::user();
@@ -32,6 +32,7 @@ class ProfileController extends Controller
         return view('profile.edit', compact('user'));
     }
 
+    // Metode untuk memperbarui informasi profil pengguna
     public function update(Request $request): RedirectResponse
     {
         $user = Auth::user();
@@ -60,7 +61,8 @@ class ProfileController extends Controller
         return redirect()->route('profile.index')
             ->with('success', 'Profil berhasil diperbarui.');
     }
-
+    
+    // Metode untuk memperbarui password pengguna
     public function updatePassword(Request $request): RedirectResponse
     {
         $request->validate([

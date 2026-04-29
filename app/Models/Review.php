@@ -19,6 +19,7 @@ class Review extends Model
         'review_text',
     ];
 
+    // Pastikan Laravel menganggap created_at dan updated_at sebagai objek Carbon
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

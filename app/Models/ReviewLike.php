@@ -18,15 +18,19 @@ class ReviewLike extends Model
         'review_id',
     ];
 
+    // Pastikan Laravel menganggap created_at sebagai objek Carbon
     protected $casts = [
         'created_at' => 'datetime',
     ];
 
+    // Relasi dengan User
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    
+    // Relasi dengan Review
     public function review(): BelongsTo
     {
         return $this->belongsTo(Review::class);
