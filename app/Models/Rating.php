@@ -23,6 +23,7 @@ class Rating extends Model
         'score',
     ];
 
+    // Pastikan Laravel menganggap score sebagai integer, serta created_at sebagai objek Carbon
     protected $casts = [
         'score' => 'integer',
         'created_at' => 'datetime',
@@ -42,11 +43,13 @@ class Rating extends Model
         $this->attributes['score'] = $score;
     }
 
+    // Relasi dengan User dan Movie
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    // Relasi dengan Movie
     public function movie(): BelongsTo
     {
         return $this->belongsTo(Movie::class);

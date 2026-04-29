@@ -57,11 +57,13 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    // Metode untuk mendapatkan password yang digunakan untuk autentikasi
     public function getAuthPassword(): string
     {
         return $this->password;
     }
 
+    // Relasi one-to-many dengan Review, Rating, Watchlist, dan ReviewLike
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
@@ -82,6 +84,7 @@ class User extends Authenticatable
         return $this->hasMany(ReviewLike::class);
     }
 
+    // Relasi many-to-many untuk daftar film yang ada di watchlist user, termasuk statusnya
     public function watchedMovies(): BelongsToMany
     {
         return $this->belongsToMany(Movie::class, 'watchlists')
@@ -89,18 +92,22 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    // Relasi many-to-many untuk daftar film yang sudah dirating user, termasuk skor rating dan tanggalnya
     public function ratedMovies(): BelongsToMany
     {
         return $this->belongsToMany(Movie::class, 'ratings')
             ->withPivot('score', 'created_at');
     }
 
+    // Relasi many-to-many untuk daftar film yang sudah direview user, termasuk isi review dan tanggalnya
     public function reviewedMovies(): BelongsToMany
     {
         return $this->belongsToMany(Movie::class, 'reviews')
             ->withPivot('review_text', 'created_at', 'updated_at');
     }
 
+    
+    // Relasi many-to-many untuk daftar ulasan yang sudah disukai user, termasuk tanggal like-nya
     public function likedReviews(): BelongsToMany
     {
         return $this->belongsToMany(Review::class, 'review_likes')

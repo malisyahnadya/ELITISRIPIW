@@ -24,6 +24,7 @@ class Movie extends Model
         'trailer_url',
     ];
 
+    // Pastikan Laravel menganggap release_year dan duration_minutes sebagai integer, serta created_at dan updated_at sebagai objek Carbon
     protected $casts = [
         'release_year' => 'integer',
         'duration_minutes' => 'integer',
@@ -31,32 +32,38 @@ class Movie extends Model
         'updated_at' => 'datetime',
     ];
 
+    // Relasi many-to-many dengan Genre, Actor, dan Director
     public function genres(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class, 'movie_genres');
     }
 
+    // Relasi many-to-many dengan Actor, termasuk pivot role_name untuk menyimpan nama peran aktor dalam film
     public function actors(): BelongsToMany
     {
         return $this->belongsToMany(Actor::class, 'movie_actors')
             ->withPivot('role_name');
     }
 
+    // Relasi many-to-many dengan Director
     public function directors(): BelongsToMany
     {
         return $this->belongsToMany(Director::class, 'movie_directors');
     }
 
+    // Relasi one-to-many dengan Review, Rating, dan Watchlist
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
+    // Relasi one-to-many dengan Rating
     public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class);
     }
 
+    // Relasi one-to-many dengan Watchlist
     public function watchlists(): HasMany
     {
         return $this->hasMany(Watchlist::class);
@@ -234,6 +241,7 @@ class Movie extends Model
                      ->withRatingsStats();
     }
 
+    // Scope untuk mengurutkan film berdasarkan judul
     public function scopeSortByTitle(Builder $query, string $direction = 'asc'): Builder
     {
         return $query->orderBy('title', $direction);

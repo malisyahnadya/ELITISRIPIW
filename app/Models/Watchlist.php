@@ -21,16 +21,19 @@ class Watchlist extends Model
         'status',
     ];
 
+    // Pastikan Laravel menganggap created_at dan updated_at sebagai objek Carbon
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
+    // Relasi dengan User
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    // Relasi dengan Movie
     public function movie(): BelongsTo
     {
         return $this->belongsTo(Movie::class);

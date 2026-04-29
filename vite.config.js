@@ -11,4 +11,10 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    // server: {
+    // host: '0.0.0.0', 
+    // hmr: {
+    //     host: '10.9.102.49', // Masukin IP kampus lo yang HARI INI
+    // },
+    
 });

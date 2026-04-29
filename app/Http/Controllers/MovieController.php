@@ -10,8 +10,10 @@ use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
+    
     public function index()
     {
+        // Ambil data minimal untuk card beranda + statistik rating agar tidak memicu query tambahan di view.
         $movies = Movie::query()
             ->forHomeCard()
             ->orderByDesc('release_year')
@@ -31,6 +33,7 @@ class MovieController extends Controller
 
     public function show(Movie $movie)
     {
+        // Eager load relasi utama untuk halaman detail film.
         $movie->load([
             'directors:id,name,photo_path',
             'actors:id,name,photo_path',
@@ -42,6 +45,7 @@ class MovieController extends Controller
             },
         ]);
 
+        // Preload agregat rating agar accessor average_score memakai nilai yang sudah tersedia.
         $movie->loadCount('ratings');
         $movie->loadAvg('ratings', 'score');
 
@@ -52,6 +56,7 @@ class MovieController extends Controller
         if (auth()->check()) {
             $userId = (int) auth()->id();
 
+            // Ambil interaksi user saat ini terhadap film (rating/review/watchlist) bila sudah login.
             $userRating = Rating::query()
                 ->forMovie((int) $movie->id)
                 ->forUser($userId)
@@ -71,6 +76,7 @@ class MovieController extends Controller
         return view('movies.movie', compact('movie', 'userRating', 'userReview', 'userWatchlist'));
     }
 
+    // Metode untuk menyimpan atau memperbarui rating user terhadap film tertentu.
     public function storeRating(Request $request, Movie $movie)
     {
         $validated = $request->validate([
@@ -88,6 +94,7 @@ class MovieController extends Controller
         return back()->with('success', 'Rating berhasil disimpan.');
     }
 
+    // Metode untuk menyimpan atau memperbarui review user terhadap film tertentu.
     public function storeReview(Request $request, Movie $movie)
     {
         $validated = $request->validate([

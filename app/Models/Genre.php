@@ -11,12 +11,11 @@ class Genre extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'name',
     ];
 
+    // Pastikan Laravel menganggap created_at dan updated_at sebagai objek Carbon
     public function movies(): BelongsToMany
     {
         return $this->belongsToMany(Movie::class, 'movie_genres');

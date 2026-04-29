@@ -13,27 +13,26 @@ class Actor extends Model
     use HasFactory;
     use ResolvesMediaUrls;
 
-    protected $table = 'actors';
-
-    public $timestamps = false;
-
     protected $fillable = [
         'name',
         'photo_path',
         'profile_path',
     ];
 
+    // Pastikan Laravel menganggap created_at dan updated_at sebagai objek Carbon
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
+    // Relasi many-to-many dengan Movie, termasuk pivot role_name
     public function movies(): BelongsToMany
     {
         return $this->belongsToMany(Movie::class, 'movie_actors')
             ->withPivot('role_name');
     }
 
+    // Metode untuk mendapatkan nama peran aktor dalam sebuah film
     public function getRoleNameForMovie(Movie $movie): ?string
     {
         $pivot = $this->movies()
@@ -43,11 +42,13 @@ class Actor extends Model
         return $pivot ? $pivot->pivot->role_name : null;
     }
 
+    // Accessor untuk mendapatkan URL foto aktor, prioritaskan profile_path jika ada
     public function getPhotoUrlAttribute(): ?string
     {
         return $this->resolveMediaUrl($this->profile_path ?: $this->photo_path);
     }
 
+    // Scope untuk pencarian aktor berdasarkan nama
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         if (blank($term)) {
@@ -57,6 +58,7 @@ class Actor extends Model
         return $query->where('name', 'LIKE', '%' . $term . '%');
     }
 
+    // Scope untuk mengurutkan aktor berdasarkan nama
     public function scopeSortByName(Builder $query, string $direction = 'asc'): Builder
     {
         $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
