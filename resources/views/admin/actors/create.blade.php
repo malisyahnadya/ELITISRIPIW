@@ -1,60 +1,26 @@
-<x-app-layout>
-	<x-slot name="header">
-		<h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-			{{ __('Tambah Aktor') }}
-		</h2>
-	</x-slot>
+<x-admin-layout title="Add Actor" subtitle="Tambahkan aktor baru untuk cast movie.">
+    <x-slot name="actions"><a href="{{ route('admin.actors.index') }}" class="admin-btn-outline"><i class="bi bi-arrow-left"></i> Back</a></x-slot>
 
-	<div class="py-12">
-		<div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-			<div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-				<div class="p-6 text-gray-900 dark:text-gray-100">
-					<form method="POST" action="{{ url('/admin/actors') }}" class="space-y-6">
-						@csrf
-
-						<div>
-							<x-input-label for="name" :value="__('Nama Aktor')" />
-							<x-text-input
-								id="name"
-								name="name"
-								type="text"
-								class="block mt-1 w-full"
-								:value="old('name')"
-								maxlength="100"
-								required
-								autofocus
-							/>
-							<x-input-error :messages="$errors->get('name')" class="mt-2" />
-						</div>
-
-						<div>
-							<x-input-label for="photo_path" :value="__('Path Foto (Opsional)')" />
-							<x-text-input
-								id="photo_path"
-								name="photo_path"
-								type="text"
-								class="block mt-1 w-full"
-								:value="old('photo_path')"
-								placeholder="contoh: actors/tom-hanks.jpg"
-							/>
-							<x-input-error :messages="$errors->get('photo_path')" class="mt-2" />
-						</div>
-
-						<div class="flex items-center gap-3">
-							<x-primary-button>
-								{{ __('Simpan') }}
-							</x-primary-button>
-
-							<a
-								href="{{ url('/admin/actors') }}"
-								class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
-							>
-								{{ __('Batal') }}
-							</a>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
-</x-app-layout>
+    <section class="admin-panel">
+        <header class="admin-panel-head"><h2>Actor Form</h2><span class="admin-badge">Create</span></header>
+        <div class="admin-panel-body">
+            <form method="POST" action="{{ route('admin.actors.store') }}" enctype="multipart/form-data" class="admin-form">
+                @csrf
+                <div class="admin-field">
+                    <label for="name">Name</label>
+                    <input id="name" class="admin-input" name="name" value="{{ old('name') }}" maxlength="100" required>
+                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                </div>
+                <div class="admin-field">
+                    <label for="photo">Photo</label>
+                    <input id="photo" class="admin-file" name="photo" type="file" accept="image/*">
+                    <x-input-error :messages="$errors->get('photo')" class="mt-2" />
+                </div>
+                <div class="admin-actions" style="justify-content:flex-end">
+                    <a href="{{ route('admin.actors.index') }}" class="admin-btn-outline">Cancel</a>
+                    <button class="admin-btn" type="submit">Save Actor</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</x-admin-layout>
