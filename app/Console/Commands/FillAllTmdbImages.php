@@ -48,6 +48,40 @@ class FillAllTmdbImages extends Command
                 $movie->banner_path = 'https://image.tmdb.org/t/p/original' . $result['backdrop_path'];
             }
 
+if (!empty($result['id']) && ($this->option('overwrite') || blank($movie->trailer_url))) {
+    $videoResponse = Http::get('https://api.themoviedb.org/3/movie/' . $result['id'] . '/videos', [
+        'api_key' => $apiKey,
+        'language' => 'en-US',
+    ]);
+
+    if ($videoResponse->successful()) {
+        $videos = collect($videoResponse->json('results', []));
+
+        $trailer = $videos
+            ->where('site', 'YouTube')
+            ->where('type', 'Trailer')
+            ->where('official', true)
+            ->first();
+
+        if (!$trailer) {
+            $trailer = $videos
+                ->where('site', 'YouTube')
+                ->where('type', 'Trailer')
+                ->first();
+        }
+
+        if (!$trailer) {
+            $trailer = $videos
+                ->where('site', 'YouTube')
+                ->first();
+        }
+
+        if ($trailer && !empty($trailer['key'])) {
+            $movie->trailer_url = 'https://www.youtube.com/watch?v=' . $trailer['key'];
+        }
+    }
+}
+
             $movie->save();
 
             $this->info("Movie: {$movie->title}");

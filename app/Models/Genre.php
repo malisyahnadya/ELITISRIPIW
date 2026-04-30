@@ -11,6 +11,8 @@ class Genre extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'name',
     ];
@@ -35,5 +37,4 @@ class Genre extends Model
     {
         return $query->orderBy('name', $direction);
     }
-
 }
