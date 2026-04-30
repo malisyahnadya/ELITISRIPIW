@@ -6,6 +6,7 @@
     $menuItems = [
         ['route' => 'admin.dashboard', 'pattern' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => 'bi-grid-1x2'],
         ['route' => 'admin.movies.index', 'pattern' => 'admin.movies.*', 'label' => 'Movies', 'icon' => 'bi-camera-reels'],
+        ['route' => 'admin.tmdb-import.index', 'pattern' => 'admin.tmdb-import.*', 'label' => 'Import TMDB', 'icon' => 'bi-cloud-download'],
         ['route' => 'admin.genres.index', 'pattern' => 'admin.genres.*', 'label' => 'Genres', 'icon' => 'bi-square'],
         ['route' => 'admin.actors.index', 'pattern' => 'admin.actors.*', 'label' => 'Actors', 'icon' => 'bi-people'],
         ['route' => 'admin.directors.index', 'pattern' => 'admin.directors.*', 'label' => 'Directors', 'icon' => 'bi-mortarboard'],

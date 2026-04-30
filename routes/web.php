@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DirectorController as AdminDirectorController;
 use App\Http\Controllers\Admin\GenreController as AdminGenreController;
 use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\TmdbImportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MovieController;
@@ -34,6 +35,12 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+        Route::get('/tmdb-import', [TmdbImportController::class, 'index'])
+            ->name('admin.tmdb-import.index');
+
+        Route::post('/tmdb-import', [TmdbImportController::class, 'store'])
+            ->name('admin.tmdb-import.store');
 
         Route::resource('movies', AdminMovieController::class)->names('admin.movies');
         Route::resource('directors', AdminDirectorController::class)->names('admin.directors');
