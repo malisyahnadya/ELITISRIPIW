@@ -2,34 +2,50 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Nonaktifkan foreign key check agar truncate/delete tidak terhalang constraint
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-        $this->call(DemoMovieSeeder::class);
-        $this->call(UsersTableSeeder::class); // User harus paling atas 
-        $this->call(MoviesTableSeeder::class); // Movie juga harus sebelum rating/review 
-        $this->call(ActorsTableSeeder::class);
-        $this->call(DirectorsTableSeeder::class);
-        $this->call(GenresTableSeeder::class);
-        $this->call(MovieActorsTableSeeder::class);
-        $this->call(MovieDirectorsTableSeeder::class);
-        $this->call(MovieGenresTableSeeder::class);
-        $this->call(RatingsTableSeeder::class); // Butuh User & Movie 
-        $this->call(ReviewsTableSeeder::class); // Butuh User & Movie 
-        $this->call(ReviewLikesTableSeeder::class); // Butuh Review & User 
-        $this->call(WatchlistsTableSeeder::class); // Butuh User & Movie
+        // Urutan truncate: dari tabel paling dependen ke paling dasar
+        foreach ([
+            'review_likes',
+            'watchlists',
+            'ratings',
+            'reviews',
+            'movie_actors',
+            'movie_directors',
+            'movie_genres',
+            'movies',
+            'actors',
+            'directors',
+            'genres',
+            'users',
+        ] as $table) {
+            DB::table($table)->truncate();
+        }
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+        // Urutan seeding: tabel dasar dulu, baru tabel yang bergantung
+        $this->call([
+            UsersTableSeeder::class,          // harus pertama
+            MoviesTableSeeder::class,          // harus sebelum relasi
+            ActorsTableSeeder::class,
+            DirectorsTableSeeder::class,
+            GenresTableSeeder::class,
+            MovieActorsTableSeeder::class,     // butuh movies + actors
+            MovieDirectorsTableSeeder::class,  // butuh movies + directors
+            MovieGenresTableSeeder::class,     // butuh movies + genres
+            RatingsTableSeeder::class,         // butuh users + movies
+            ReviewsTableSeeder::class,         // butuh users + movies
+            ReviewLikesTableSeeder::class,     // butuh reviews + users
+            WatchlistsTableSeeder::class,      // butuh users + movies
+        ]);
     }
 }

@@ -4,144 +4,193 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class MoviesTableSeeder extends Seeder
 {
-
-    /**
-     * Auto generated seed file
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        
-
         DB::table('movies')->delete();
-        
-        DB::table('movies')->insert(array (
-            0 => 
-            array (
-                'id' => 1,
-                'title' => 'Inception',
-                'description' => 'A thief who steals corporate secrets through dream-sharing technology is given a chance to erase his criminal past.',
-                'release_year' => 2010,
+
+        $now = Carbon::now();
+
+        DB::table('movies')->insert([
+            [
+                'id'               => 1,
+                'title'            => 'Inception',
+                'description'      => 'Seorang pencuri yang ahli menyusup ke alam mimpi untuk mencuri rahasia korporat diberi kesempatan terakhir: menanamkan sebuah ide ke pikiran target agar bisa kembali ke keluarganya.',
+                'release_year'     => 2010,
                 'duration_minutes' => 148,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            1 => 
-            array (
-                'id' => 2,
-                'title' => 'The Matrix',
-                'description' => 'A hacker learns about the true nature of reality and his role in the war against its controllers.',
-                'release_year' => 1999,
-                'duration_minutes' => 136,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            2 => 
-            array (
-                'id' => 3,
-                'title' => 'The Dark Knight',
-                'description' => 'Batman faces the Joker, a criminal mastermind who wants to plunge Gotham into anarchy.',
-                'release_year' => 2008,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 2,
+                'title'            => 'The Dark Knight',
+                'description'      => 'Batman menghadapi ancaman terbesar Gotham dari Joker, seorang kriminal anarkis yang ingin menenggelamkan kota dalam kekacauan total.',
+                'release_year'     => 2008,
                 'duration_minutes' => 152,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            3 => 
-            array (
-                'id' => 4,
-                'title' => 'Interstellar',
-                'description' => 'Explorers travel through a wormhole in space in an attempt to ensure humanity’s survival.',
-                'release_year' => 2014,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 3,
+                'title'            => 'Interstellar',
+                'description'      => 'Sekelompok penjelajah melakukan perjalanan melalui lubang cacing untuk menemukan planet baru demi menyelamatkan peradaban manusia yang sekarat.',
+                'release_year'     => 2014,
                 'duration_minutes' => 169,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            4 => 
-            array (
-                'id' => 5,
-                'title' => 'Blade Runner 2049',
-                'description' => 'A young blade runner discovers a secret that could plunge society into chaos.',
-                'release_year' => 2017,
-                'duration_minutes' => 164,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            5 => 
-            array (
-                'id' => 6,
-                'title' => 'Dune',
-                'description' => 'A noble family becomes embroiled in a war for control over the galaxy’s most valuable asset.',
-                'release_year' => 2021,
-                'duration_minutes' => 155,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            6 => 
-            array (
-                'id' => 7,
-                'title' => 'Spider-Man: No Way Home',
-                'description' => 'Spider-Man seeks help to restore his secret identity, but breaks the multiverse.',
-                'release_year' => 2021,
-                'duration_minutes' => 148,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            7 => 
-            array (
-                'id' => 8,
-                'title' => 'Avengers: Endgame',
-                'description' => 'The Avengers assemble once more to reverse Thanos’ actions and restore balance.',
-                'release_year' => 2019,
-                'duration_minutes' => 181,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            8 => 
-            array (
-                'id' => 9,
-                'title' => 'Parasite',
-                'description' => 'Greed and class discrimination threaten the newly formed symbiotic relationship between two families.',
-                'release_year' => 2019,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 4,
+                'title'            => 'Parasite',
+                'description'      => 'Keluarga Ki-taek yang miskin perlahan menyusup ke kehidupan keluarga Park yang kaya raya — hingga sebuah rahasia tersembunyi meledakkan segalanya.',
+                'release_year'     => 2019,
                 'duration_minutes' => 132,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-            9 => 
-            array (
-                'id' => 10,
-                'title' => 'Get Out',
-                'description' => 'A young African-American visits his white girlfriend’s parents for the weekend, where secrets emerge.',
-                'release_year' => 2017,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 5,
+                'title'            => 'Dune',
+                'description'      => 'Paul Atreides, pewaris sebuah keluarga bangsawan, harus menjalani takdirnya di Arrakis — planet gurun penghasil satu-satunya komoditas paling berharga di alam semesta.',
+                'release_year'     => 2021,
+                'duration_minutes' => 155,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 6,
+                'title'            => 'Avengers: Endgame',
+                'description'      => 'Setelah separuh alam semesta lenyap akibat Thanos, para Avengers yang tersisa melakukan satu misi mustahil untuk membalikkan segalanya.',
+                'release_year'     => 2019,
+                'duration_minutes' => 181,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 7,
+                'title'            => 'Spider-Man: No Way Home',
+                'description'      => 'Peter Parker meminta Doctor Strange untuk menghapus ingatan publik tentang identitasnya sebagai Spider-Man, namun mantra yang salah justru memecah multiverse.',
+                'release_year'     => 2021,
+                'duration_minutes' => 148,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 8,
+                'title'            => 'Get Out',
+                'description'      => 'Seorang pria kulit hitam mengunjungi keluarga kekasihnya yang kulit putih, dan perlahan menyadari sesuatu yang jauh lebih gelap dari sekadar ketidaknyamanan rasial.',
+                'release_year'     => 2017,
                 'duration_minutes' => 104,
-                'poster_path' => NULL,
-                'banner_path' => NULL,
-                'created_at' => '2026-04-05 11:23:44',
-                'updated_at' => '2026-04-05 11:23:44',
-            ),
-        ));
-        
-        
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 9,
+                'title'            => 'Joker',
+                'description'      => 'Arthur Fleck, seorang badut paruh waktu yang diremehkan masyarakat Gotham, perlahan terjerumus ke dalam kegilaan dan menjadi simbol kekacauan yang mengubah kota.',
+                'release_year'     => 2019,
+                'duration_minutes' => 122,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 10,
+                'title'            => 'Blade Runner 2049',
+                'description'      => 'Blade runner LAPD bernama K menemukan rahasia lama yang bisa mengguncang tatanan masyarakat, dan pencariannya membawa dia pada Rick Deckard yang telah lama menghilang.',
+                'release_year'     => 2017,
+                'duration_minutes' => 164,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 11,
+                'title'            => 'Pulp Fiction',
+                'description'      => 'Kisah dua pembunuh bayaran, seorang petinju, dan sepasang penodong restoran terjalin dalam struktur non-linear yang penuh kekerasan, humor gelap, dan penebusan.',
+                'release_year'     => 1994,
+                'duration_minutes' => 154,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 12,
+                'title'            => 'The Lord of the Rings: The Fellowship of the Ring',
+                'description'      => 'Frodo Baggins, seorang hobbit, mewarisi Cincin Satu yang legendaris dan harus memimpin sebuah persekutuan untuk menghancurkannya sebelum jatuh ke tangan Sauron.',
+                'release_year'     => 2001,
+                'duration_minutes' => 178,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 13,
+                'title'            => '500 Days of Summer',
+                'description'      => 'Tom, seorang penulis kartu ucapan yang romantis, jatuh cinta pada Summer — rekan kerjanya yang tidak percaya cinta sejati. Kisah ini bukan soal cinta, tapi tentang bagaimana kita menafsirkannya.',
+                'release_year'     => 2009,
+                'duration_minutes' => 95,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 14,
+                'title'            => 'Venom: Let There Be Carnage',
+                'description'      => 'Eddie Brock berusaha hidup berdampingan dengan symbiote Venom, sementara penjahat serial killer Cletus Kasady menjadi inang bagi Carnage — symbiote yang jauh lebih brutal.',
+                'release_year'     => 2021,
+                'duration_minutes' => 97,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 15,
+                'title'            => 'Iron Man 3',
+                'description'      => 'Tony Stark menghadapi krisis identitas setelah serangan New York, sementara musuh misterius bernama Mandarin mengancam menghancurkan segalanya yang ia cintai.',
+                'release_year'     => 2013,
+                'duration_minutes' => 130,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+            [
+                'id'               => 16,
+                'title'            => 'Kimi no Na wa.',
+                'description'      => 'Dua remaja dari kota dan desa yang tidak pernah bertemu tiba-tiba bertukar tubuh secara misterius. Ketika keanehan itu berhenti, salah satu dari mereka mencari tahu mengapa.',
+                'release_year'     => 2016,
+                'duration_minutes' => 106,
+                'poster_path'      => null,
+                'banner_path'      => null,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ],
+        ]);
     }
 }
