@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewLikeController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
@@ -24,8 +25,10 @@ Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.sh
 Route::middleware('auth')->group(function () {
     Route::get('/my-watchlist', [WatchlistController::class, 'index'])->name('watchlist.index');
     Route::post('/movies/{movie}/watchlist', [WatchlistController::class, 'store'])->name('watchlist.store');
+    Route::delete('/movies/{movie}/watchlist', [WatchlistController::class, 'destroy'])->name('watchlist.destroy');
     Route::post('/movies/{movie}/ratings', [MovieController::class, 'storeRating'])->name('movies.ratings.store');
     Route::post('/movies/{movie}/reviews', [MovieController::class, 'storeReview'])->name('movies.reviews.store');
+    Route::post('/reviews/{review}/like', [ReviewLikeController::class, 'toggle'])->name('reviews.like.toggle');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');

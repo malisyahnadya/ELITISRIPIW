@@ -10,6 +10,7 @@
         ['route' => 'admin.genres.index', 'pattern' => 'admin.genres.*', 'label' => 'Genres', 'icon' => 'bi-square'],
         ['route' => 'admin.actors.index', 'pattern' => 'admin.actors.*', 'label' => 'Actors', 'icon' => 'bi-people'],
         ['route' => 'admin.directors.index', 'pattern' => 'admin.directors.*', 'label' => 'Directors', 'icon' => 'bi-mortarboard'],
+        ['route' => 'admin.reviews.index', 'pattern' => 'admin.reviews.*', 'label' => 'Reviews', 'icon' => 'bi-chat-square-text'],
         ['route' => 'admin.users.index', 'pattern' => 'admin.users.*', 'label' => 'Users', 'icon' => 'bi-people-fill'],
     ];
 @endphp

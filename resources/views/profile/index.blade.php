@@ -72,9 +72,9 @@
 
             <section>
                 <h2 class="elit-section-title">My Watch List</h2>
-                <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                     @forelse($watchlist as $movie)
-                        <x-movie-card :movie="$movie" :status="$movie->pivot->status" />
+                        <x-movie-card :movie="$movie" :watchlist-status="$movie->pivot->status" />
                     @empty
                         <a href="{{ route('search') }}" class="flex min-h-72 items-center justify-center rounded-xl bg-[#3a2860] text-6xl text-violet-200 transition hover:bg-[#4b3775]"><i class="bi bi-plus-circle"></i></a>
                     @endforelse
@@ -83,7 +83,7 @@
             </section>
 
             <section id="reviews">
-                <h2 class="elit-section-title">Lasted reviews</h2>
+                <h2 class="elit-section-title">Latest Reviews</h2>
                 <div class="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                     @forelse($reviewedMovies as $movie)
                         <article class="review-card">
@@ -104,7 +104,10 @@
                             <h3 class="mt-4 truncate text-sm font-black uppercase text-violet-100">{{ $movie->title }}</h3>
                             <p class="mt-3 line-clamp-6 text-xs leading-5 text-white/80">{{ $movie->pivot->review_text }}</p>
                             <div class="mt-5 border-t border-white/80 pt-3 text-right text-xs text-violet-100/80">
-                                <i class="bi bi-hand-thumbs-up"></i> 200k &nbsp; <i class="bi bi-hand-thumbs-down"></i> 200k
+                                <a href="{{ route('movies.show', $movie) }}" class="hover:text-white">
+                                    Lihat detail review
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
                             </div>
                         </article>
                     @empty

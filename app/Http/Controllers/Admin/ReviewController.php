@@ -21,7 +21,7 @@ class ReviewController extends Controller
             ->withCount('likes')
             ->search($search)
             ->orderBy('created_at', $sort)
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         return view('admin.reviews.index', compact('reviews', 'search', 'sort'));
