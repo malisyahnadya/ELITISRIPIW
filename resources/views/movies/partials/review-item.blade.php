@@ -58,10 +58,29 @@
 
     {{-- Footer: likes count --}}
     <div class="mt-4 flex items-center gap-4 text-xs text-violet-300/60">
-        <span class="flex items-center gap-1.5">
-            <i class="bi bi-hand-thumbs-up"></i>
-            {{ $review->likes_count ?? 0 }} Likes
-        </span>
+        @php
+            $likedByCurrentUser = (bool) ($review->liked_by_current_user ?? false);
+        @endphp
+
+        @auth
+            <form method="POST" action="{{ route('reviews.like.toggle', $review) }}">
+                @csrf
+                <button
+                    type="submit"
+                    class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold transition {{ $likedByCurrentUser ? 'bg-pink-500/20 text-pink-100' : 'hover:bg-white/10 hover:text-white' }}"
+                    aria-label="{{ $likedByCurrentUser ? 'Unlike review' : 'Like review' }}"
+                >
+                    <i class="bi {{ $likedByCurrentUser ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                    {{ $review->likes_count ?? 0 }} Likes
+                </button>
+            </form>
+        @else
+            <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 hover:bg-white/10 hover:text-white">
+                <i class="bi bi-heart"></i>
+                {{ $review->likes_count ?? 0 }} Likes
+            </a>
+        @endauth
+
         <span class="flex items-center gap-1.5">
             <i class="bi bi-clock"></i>
             {{ optional($review->created_at)->diffForHumans() }}

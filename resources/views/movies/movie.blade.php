@@ -121,18 +121,31 @@
                         </div>
 
                         @auth
-                            <form method="POST" action="{{ route('watchlist.store', $movie) }}" class="flex flex-wrap items-center gap-2">
-                                @csrf
-                                <select name="status" class="rounded-lg border border-[#7a669f] bg-[#312a4a] px-3 py-2 text-sm text-white focus:border-[#a855f7] focus:outline-none focus:ring-[#a855f7]">
-                                    <option value="plan_to_watch" @selected($selectedStatus === 'plan_to_watch')>Plan to Watch</option>
-                                    <option value="watching" @selected($selectedStatus === 'watching')>Watching</option>
-                                    <option value="completed" @selected($selectedStatus === 'completed')>Completed</option>
-                                </select>
-                                <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-[#7a669f] px-4 py-2 text-sm font-bold text-[#d6c6ff] transition hover:bg-[#7a669f] hover:text-white">
-                                    <i class="bi {{ $userWatchlist ? 'bi-bookmark-fill' : 'bi-bookmark-plus' }}"></i>
-                                    {{ $userWatchlist ? 'Update Watchlist' : 'Add To Watch List' }}
-                                </button>
-                            </form>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <form method="POST" action="{{ route('watchlist.store', $movie) }}" class="flex flex-wrap items-center gap-2">
+                                    @csrf
+                                    <select name="status" class="rounded-lg border border-[#7a669f] bg-[#312a4a] px-3 py-2 text-sm text-white focus:border-[#a855f7] focus:outline-none focus:ring-[#a855f7]">
+                                        <option value="plan_to_watch" @selected($selectedStatus === 'plan_to_watch')>Plan to Watch</option>
+                                        <option value="watching" @selected($selectedStatus === 'watching')>Watching</option>
+                                        <option value="completed" @selected($selectedStatus === 'completed')>Completed</option>
+                                    </select>
+                                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-[#7a669f] px-4 py-2 text-sm font-bold text-[#d6c6ff] transition hover:bg-[#7a669f] hover:text-white">
+                                        <i class="bi {{ $userWatchlist ? 'bi-bookmark-fill' : 'bi-bookmark-plus' }}"></i>
+                                        {{ $userWatchlist ? 'Update Watchlist' : 'Add To Watch List' }}
+                                    </button>
+                                </form>
+
+                                @if($userWatchlist)
+                                    <form method="POST" action="{{ route('watchlist.destroy', $movie) }}" onsubmit="return confirm('Hapus dari watchlist?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-red-300/40 px-4 py-2 text-sm font-bold text-red-100 transition hover:bg-red-500/20">
+                                            <i class="bi bi-bookmark-x"></i>
+                                            Remove
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         @else
                             <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-lg border border-[#7a669f] px-4 py-2 text-sm font-bold text-[#d6c6ff] transition hover:bg-[#7a669f] hover:text-white">
                                 Add To Watch List <i class="bi bi-plus-lg"></i>
@@ -215,9 +228,31 @@
                                 <div class="text-xs text-[#a9a2b8]">{{ optional($review->created_at)->format('j/n/Y') }}</div>
                             </div>
                         </div>
-                        <span class="rounded-full px-2 py-1 text-xs font-semibold text-[#a9a2b8]">
-                            <i class="bi bi-heart"></i> {{ $review->likes_count ?? 0 }}
-                        </span>
+                        @php
+                            $likedByCurrentUser = (bool) ($review->liked_by_current_user ?? false);
+                        @endphp
+
+                        @auth
+                            <form method="POST" action="{{ route('reviews.like.toggle', $review) }}">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="rounded-full px-3 py-1 text-xs font-semibold transition {{ $likedByCurrentUser ? 'bg-pink-500/20 text-pink-200' : 'text-[#a9a2b8] hover:bg-white/10 hover:text-white' }}"
+                                    aria-label="{{ $likedByCurrentUser ? 'Unlike review' : 'Like review' }}"
+                                >
+                                    <i class="bi {{ $likedByCurrentUser ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                                    {{ $review->likes_count ?? 0 }}
+                                </button>
+                            </form>
+                        @else
+                            <a
+                                href="{{ route('login') }}"
+                                class="rounded-full px-3 py-1 text-xs font-semibold text-[#a9a2b8] hover:bg-white/10 hover:text-white"
+                                aria-label="Login untuk like review"
+                            >
+                                <i class="bi bi-heart"></i> {{ $review->likes_count ?? 0 }}
+                            </a>
+                        @endauth
                     </div>
 
                     <p class="mt-4 text-sm leading-7 text-[#d1cde0]">{!! nl2br(e($review->review_text)) !!}</p>

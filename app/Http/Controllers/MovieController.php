@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRatingRequest;
+use App\Http\Requests\StoreReviewRequest;
 use App\Models\Movie;
 use App\Models\Rating;
 use App\Models\Review;
 use App\Models\Watchlist;
-use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
@@ -41,6 +42,13 @@ class MovieController extends Controller
             'reviews' => function ($query) {
                 $query->with(['user:id,name,username,profile_photo'])
                     ->withLikesCount()
+                    ->when(auth()->check(), function ($query) {
+                        $query->withExists([
+                            'likes as liked_by_current_user' => function ($likeQuery) {
+                                $likeQuery->where('user_id', auth()->id());
+                            },
+                        ]);
+                    })
                     ->latestFirst();
             },
         ]);
@@ -77,11 +85,9 @@ class MovieController extends Controller
     }
 
     // Metode untuk menyimpan atau memperbarui rating user terhadap film tertentu.
-    public function storeRating(Request $request, Movie $movie)
+    public function storeRating(StoreRatingRequest $request, Movie $movie)
     {
-        $validated = $request->validate([
-            'score' => ['required', 'integer', 'between:' . Rating::MIN_SCORE . ',' . Rating::MAX_SCORE],
-        ]);
+        $validated = $request->validated();
 
         Rating::updateOrCreate(
             [
@@ -95,11 +101,9 @@ class MovieController extends Controller
     }
 
     // Metode untuk menyimpan atau memperbarui review user terhadap film tertentu.
-    public function storeReview(Request $request, Movie $movie)
+    public function storeReview(StoreReviewRequest $request, Movie $movie)
     {
-        $validated = $request->validate([
-            'review_text' => ['required', 'string', 'min:3', 'max:3000'],
-        ]);
+        $validated = $request->validated();
 
         Review::updateOrCreate(
             [

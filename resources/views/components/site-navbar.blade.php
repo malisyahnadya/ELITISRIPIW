@@ -4,8 +4,6 @@
     $navClass = $overlay
         ? 'absolute left-0 top-0 z-40 w-full bg-transparent py-5 text-white'
         : 'sticky left-0 top-0 z-40 w-full border-b border-white/10 bg-[#1c1527]/95 py-4 text-white shadow-[0_12px_40px_rgba(0,0,0,.24)] backdrop-blur';
-
-    $searchInputClass = 'w-full rounded-full border-0 bg-white/20 py-2 pl-10 pr-4 text-sm text-white placeholder:text-white/70 shadow-inner outline-none transition focus:bg-white/30 focus:ring-2 focus:ring-white/25';
 @endphp
 
 <nav x-data="{ open: false }" {{ $attributes->merge(['class' => $navClass]) }}>
@@ -26,7 +24,7 @@
                         data-search-input
                         autocomplete="off"
                         placeholder="Search movies..."
-                        class="{{ $searchInputClass }}"
+                        class="w-full rounded-full border-0 bg-white/20 py-2 pl-10 pr-4 text-sm text-white placeholder:text-white/70 shadow-inner outline-none transition focus:bg-white/30 focus:ring-2 focus:ring-white/25"
                     >
                     <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-white/55">
                         <i class="bi bi-search"></i>
@@ -43,6 +41,9 @@
         </div>
 
         <div class="hidden items-center gap-3 md:flex">
+            <a href="{{ route('movies.index') }}" class="rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/15 hover:text-white">
+                Movies
+            </a>
             @auth
                 @if (Auth::user()->role === 'admin')
                     <a href="{{ route('admin.dashboard') }}" class="rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/15 hover:text-white">
@@ -53,17 +54,6 @@
                 <a href="{{ route('profile.index') }}" class="rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/15 hover:text-white">
                     Profile
                 </a>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/15 hover:text-white">
-                        Logout
-                    </button>
-                </form>
-
-                <span class="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xl text-white">
-                    <i class="bi bi-person-circle"></i>
-                </span>
             @else
                 <a href="{{ route('login') }}" class="rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/15 hover:text-white">
                     Login
@@ -94,7 +84,7 @@
                     data-search-input
                     autocomplete="off"
                     placeholder="Search movies..."
-                    class="{{ $searchInputClass }}"
+                    class="w-full rounded-full border-0 bg-white/20 py-2 pl-10 pr-4 text-sm text-white placeholder:text-white/70 shadow-inner outline-none transition focus:bg-white/30 focus:ring-2 focus:ring-white/25"
                 >
                 <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-white/55">
                     <i class="bi bi-search"></i>
@@ -110,6 +100,7 @@
         </div>
 
         <div class="mt-4 flex flex-wrap items-center gap-2">
+            <a href="{{ route('movies.index') }}" class="rounded-full border border-white/25 px-3 py-1.5 text-xs font-semibold text-white/90">Movies</a>
             @auth
                 @if (Auth::user()->role === 'admin')
                     <a href="{{ route('admin.dashboard') }}" class="rounded-full border border-white/25 px-3 py-1.5 text-xs font-semibold text-white/90">Admin</a>

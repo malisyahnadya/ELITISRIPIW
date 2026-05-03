@@ -50,6 +50,15 @@ class HomeController extends Controller
         $recommendedMovies = Movie::query()
             ->forHomeCard()
             ->withCount('reviews')
+            ->when(Auth::check(), function ($query) {
+            $query->with([
+                'watchlists' => function ($watchlistQuery) {
+                $watchlistQuery
+                    ->where('user_id', Auth::id())
+                    ->select('id', 'user_id', 'movie_id', 'status');
+                },
+            ]);
+            })
             ->orderByRaw('(ratings_count + reviews_count) DESC')
             ->orderByDesc('ratings_avg_score')
             ->take(12)

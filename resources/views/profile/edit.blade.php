@@ -38,6 +38,17 @@
                         <label for="profile_photo" class="mb-1 block text-sm font-black text-white">Profile Photo</label>
                         <input id="profile_photo" name="profile_photo" type="file" accept="image/*" class="block w-full text-sm text-violet-100 file:mr-4 file:rounded-full file:border-0 file:bg-violet-200 file:px-4 file:py-2 file:text-sm file:font-black file:text-[#2b1d46]">
                         <x-input-error :messages="$errors->get('profile_photo')" class="mt-2" />
+
+                        @if($user->profile_photo)
+                            <button
+                                type="submit"
+                                form="delete-profile-photo-form"
+                                class="elit-ghost-btn mt-3 gap-2 text-xs text-red-100 hover:bg-red-500/20"
+                            >
+                                <i class="bi bi-trash"></i>
+                                Hapus Foto Profil
+                            </button>
+                        @endif
                     </div>
                     <div class="md:col-span-2">
                         <label for="bio" class="mb-1 block text-sm font-black text-white">Bio</label>
@@ -48,6 +59,18 @@
                         <button type="submit" class="elit-btn">Save Change</button>
                     </div>
                 </form>
+
+                @if($user->profile_photo)
+                    <form
+                        id="delete-profile-photo-form"
+                        method="POST"
+                        action="{{ route('profile.photo.destroy') }}"
+                        onsubmit="return confirm('Hapus foto profil saat ini?')"
+                    >
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                @endif
                 {{-- ═══════════════════════════════════════════
                      SECTION: GANTI PASSWORD
                      Route: PUT profile.password.update

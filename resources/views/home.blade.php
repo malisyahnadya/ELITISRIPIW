@@ -110,14 +110,11 @@
                 </div>
 
                 <div class="relative" data-scroll-section>
-                    <button type="button" data-scroll-next class="absolute -right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-black shadow-xl sm:flex" aria-label="Scroll movie list">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
                     <div data-scroll-container class="flex gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         @forelse ($recommendedMovies as $movie)
-                            <x-movie-card :movie="$movie" />
+                        <x-movie-card :movie="$movie" :watchlist-status="$movie->watchlists->first()?->status"/>
                         @empty
-                            <p class="text-[#a9a2b8]">No movies found.</p>
+                        <p class="text-[#a9a2b8]">No movies found.</p>
                         @endforelse
                     </div>
                 </div>
@@ -133,13 +130,10 @@
                     </div>
 
                     <div class="relative" data-scroll-section>
-                        <button type="button" data-scroll-next class="absolute -right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-black shadow-xl sm:flex" aria-label="Scroll watchlist">
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
                         <div data-scroll-container class="flex gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             @forelse ($userWatchlist as $item)
                                 @if ($item->movie)
-                                    <x-movie-card :movie="$item->movie" :watchlist-status="$item->status" :show-watchlist="false" />
+                                    <x-movie-card :movie="$item->movie" :watchlist-status="$item->status" :show-watchlist="true" />
                                 @endif
                             @empty
                                 <div class="min-w-full rounded-xl border border-dashed border-white/10 bg-white/5 p-8 text-center text-[#a9a2b8]">
@@ -157,9 +151,7 @@
                 </div>
 
                 <div class="relative" data-scroll-section>
-                    <button type="button" data-scroll-next class="absolute -right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-black shadow-xl sm:flex" aria-label="Scroll reviews">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
+
                     <div data-scroll-container class="flex gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         @forelse ($latestReviews as $review)
                             <article class="min-w-[285px] max-w-[285px] rounded-xl border border-[#7a669f]/25 bg-[#2f2543] p-4 shadow-[0_14px_30px_rgba(0,0,0,.2)] sm:min-w-[330px] sm:max-w-[330px]">

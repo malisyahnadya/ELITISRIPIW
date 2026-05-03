@@ -45,4 +45,16 @@ class WatchlistController extends Controller
         // Mengembalikan respons redirect kembali ke halaman sebelumnya dengan pesan sukses bahwa watchlist berhasil diperbarui.
         return back()->with('success', 'Watchlist berhasil diperbarui.');
     }
+
+
+    // Metode untuk menghapus film dari watchlist pengguna.
+    public function destroy(Request $request, Movie $movie): RedirectResponse
+    {
+        Watchlist::query()
+            ->forUser((int) $request->user()->id)
+            ->forMovie((int) $movie->id)
+            ->delete();
+
+        return back()->with('success', 'Movie berhasil dihapus dari watchlist.');
+    }
 }
