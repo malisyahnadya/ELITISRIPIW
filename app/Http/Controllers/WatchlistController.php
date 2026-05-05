@@ -15,8 +15,8 @@ class WatchlistController extends Controller
     {
         // Mengambil daftar film di watchlist pengguna saat ini dengan status terbaru, memuat data film untuk tampilan kartu, dan melakukan paginasi.
         $watchlist = Watchlist::query()
-            ->where('user_id', auth()->id())
-            ->with(['movie' => fn ($query) => $query->forHomeCard()])
+            ->forUser((int) auth()->id())
+            ->withMovieCard()
             ->latest('updated_at')
             ->paginate(18);
 

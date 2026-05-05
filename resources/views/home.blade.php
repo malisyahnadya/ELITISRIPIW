@@ -112,7 +112,7 @@
                 <div class="relative" data-scroll-section>
                     <div data-scroll-container class="flex gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         @forelse ($recommendedMovies as $movie)
-                        <x-movie-card :movie="$movie" :watchlist-status="$movie->watchlists->first()?->status"/>
+                        <x-movie-card :movie="$movie" :watchlist-status="$movie->watchlist_status"/>
                         @empty
                         <p class="text-[#a9a2b8]">No movies found.</p>
                         @endforelse

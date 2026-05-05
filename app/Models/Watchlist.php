@@ -39,6 +39,16 @@ class Watchlist extends Model
         return $this->belongsTo(Movie::class);
     }
 
+    // Scope untuk preload data movie agar kartu watchlist tidak memicu query tambahan.
+    public function scopeWithMovieCard(Builder $query): Builder
+    {
+        return $query->with([
+            'movie' => function ($movieQuery) {
+                $movieQuery->forHomeCard();
+            },
+        ]);
+    }
+
     // Scope untuk mendapatkan watchlist berdasarkan user
     public function scopeForUser(Builder $query, int $userId): Builder
     {
