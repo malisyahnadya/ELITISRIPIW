@@ -94,7 +94,7 @@ body {
 .elit-select,
 .elit-textarea {
     width: 100%;
-    border-radius: 999px;
+    border-radius: 20px;
     border: 2px solid rgba(210, 197, 242, 0.85);
     background: rgba(28, 17, 48, 0.45);
     color: #fff;
@@ -181,3 +181,5 @@ body {
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
     background: rgba(196, 183, 232, 0.5);
 }
+
+
