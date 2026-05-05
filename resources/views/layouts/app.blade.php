@@ -11,6 +11,12 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+        <!-- favicon -->
+        <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96">
+        <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg">
+        <link rel="shortcut icon" href="/favicon/favicon.ico">
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+        <link rel="manifest" href="/favicon/site.webmanifest">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('styles')
     </head>
