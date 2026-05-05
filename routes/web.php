@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/movies/{movie}/watchlist', [WatchlistController::class, 'destroy'])->name('watchlist.destroy');
     Route::post('/movies/{movie}/ratings', [MovieController::class, 'storeRating'])->name('movies.ratings.store');
     Route::post('/movies/{movie}/reviews', [MovieController::class, 'storeReview'])->name('movies.reviews.store');
+    Route::delete('/movies/{movie}/ratings', [MovieController::class, 'destroyRating'])->name('movies.ratings.destroy');
+    Route::delete('/movies/{movie}/reviews', [MovieController::class, 'destroyReview'])->name('movies.reviews.destroy');
     Route::post('/reviews/{review}/like', [ReviewLikeController::class, 'toggle'])->name('reviews.like.toggle');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');

@@ -62,7 +62,7 @@
                 @else
                     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                         @foreach ($movies as $movie)
-                            <x-movie-card :movie="$movie" :fluid="true" />
+                            <x-movie-card :movie="$movie" :watchlist-status="$movie->watchlist_status" :fluid="true" />
                         @endforeach
                     </div>
 

@@ -42,14 +42,10 @@ class Actor extends Model
             ->withPivot('role_name');
     }
 
-    // Metode untuk mendapatkan nama peran aktor dalam sebuah film
-    public function getRoleNameForMovie(Movie $movie): ?string
+    // Accessor role actor dari pivot movie_actors (null jika relasi belum dimuat).
+    public function getRoleNameAttribute(): ?string
     {
-        $pivot = $this->movies()
-            ->wherePivot('movie_id', $movie->id)
-            ->first();
-
-        return $pivot ? $pivot->pivot->role_name : null;
+        return $this->pivot?->role_name;
     }
 
     // Accessor untuk mendapatkan URL foto aktor, prioritaskan profile_path jika ada

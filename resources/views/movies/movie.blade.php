@@ -10,13 +10,6 @@
     @endphp
 
     <div class="min-h-screen bg-[#1c1527] text-white">
-        @if (session('success'))
-            <div class="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
-                <div class="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-                    {{ session('success') }}
-                </div>
-            </div>
-        @endif
 
         @if ($errors->any())
             <div class="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
@@ -55,7 +48,7 @@
                     <img src="{{ $poster }}" alt="{{ $movie->title }} poster" class="h-52 w-full rounded-xl border-2 border-[#7a669f]/25 object-cover shadow-[0_18px_45px_rgba(0,0,0,.75)] md:h-[190px]">
                 </div>
 
-                <div class="min-w-0 flex-1 rounded-2xl border border-white/5 bg-[#1c1527]/72 p-5 shadow-[0_18px_55px_rgba(0,0,0,.24)] backdrop-blur-sm md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0">
+                <div class="min-w-0 flex-1 rounded-2xl bg-[#1c1527]/72 p-5 shadow-[0_18px_55px_rgba(0,0,0,.24)] backdrop-blur-sm md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0">
                     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div>
                             <a href="{{ url()->previous() }}" class="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#b39ddb] hover:text-[#f1c40f]">
@@ -191,8 +184,8 @@
                                 @endif
                                 <div class="p-2">
                                     <div class="text-xs font-extrabold leading-snug text-white">{{ $actor->name }}</div>
-                                    @if ($actor->pivot?->role_name)
-                                        <div class="mt-1 text-[0.68rem] text-[#a9a2b8]">{{ $actor->pivot->role_name }}</div>
+                                    @if ($actor->role_name)
+                                        <div class="mt-1 text-[0.68rem] text-[#a9a2b8]">{{ $actor->role_name }}</div>
                                     @endif
                                 </div>
                             </article>
@@ -273,35 +266,121 @@
                     <p class="mt-1 text-xs text-[#a9a2b8]">Pick a star rating and leave a comment</p>
 
                     <div class="mt-5 rounded-2xl border border-[#7a669f]/25 bg-[#2f2543] p-5">
-                        <form method="POST" action="{{ route('movies.ratings.store', $movie) }}" class="flex flex-wrap items-center gap-4">
-                            @csrf
-                            <span class="text-sm text-[#a9a2b8]">Your rating:</span>
-                            <div class="flex items-center gap-1" data-star-rating data-current="{{ $currentUserScore }}">
-                                @for ($score = 1; $score <= 5; $score++)
-                                    <button type="button" data-star-value="{{ $score }}" class="text-3xl transition hover:scale-110 {{ $currentUserScore >= $score ? 'text-[#f1c40f]' : 'text-[#4a4060]' }}" aria-label="Rate {{ $score }} stars">
-                                        <i class="bi {{ $currentUserScore >= $score ? 'bi-star-fill' : 'bi-star' }}"></i>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <form
+                                method="POST"
+                                action="{{ route('movies.ratings.store', $movie) }}"
+                                class="flex flex-wrap items-center gap-4"
+                            >
+                                @csrf
+
+                                <span class="text-sm text-[#a9a2b8]">
+                                    Your rating:
+                                </span>
+
+                                <div class="flex items-center gap-1" data-star-rating data-current="{{ $currentUserScore }}">
+                                    @for ($score = 1; $score <= 5; $score++)
+                                        <button
+                                            type="button"
+                                            data-star-value="{{ $score }}"
+                                            class="text-3xl transition hover:scale-110 {{ $currentUserScore >= $score ? 'text-[#f1c40f]' : 'text-[#4a4060]' }}"
+                                            aria-label="Rate {{ $score }} stars"
+                                        >
+                                            <i class="bi {{ $currentUserScore >= $score ? 'bi-star-fill' : 'bi-star' }}"></i>
+                                        </button>
+                                    @endfor
+
+                                    <input
+                                        type="hidden"
+                                        name="score"
+                                        id="scoreInput"
+                                        value="{{ $currentUserScore ?: '' }}"
+                                        required
+                                    >
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-[#7a669f] px-5 py-2 text-sm font-bold text-white transition hover:scale-105 hover:bg-[#a855f7]"
+                                >
+                                    <i class="bi bi-star-fill"></i>
+                                    {{ $userRating ? 'Update Rating' : 'Rate' }}
+                                </button>
+                            </form>
+
+                            @if ($userRating)
+                                <form
+                                    method="POST"
+                                    action="{{ route('movies.ratings.destroy', $movie) }}"
+                                    onsubmit="return confirm('Hapus rating kamu?')"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button
+                                        type="submit"
+                                        class="inline-flex items-center gap-2 rounded-lg border border-red-300/40 px-4 py-2 text-sm font-bold text-red-100 transition hover:bg-red-500/20"
+                                    >
+                                        <i class="bi bi-trash"></i>
+                                        Hapus Rating
                                     </button>
-                                @endfor
-                                <input type="hidden" name="score" id="scoreInput" value="{{ $currentUserScore ?: '' }}" required>
-                            </div>
-                            <button type="submit" class="rounded-lg bg-[#7a669f] px-5 py-2 text-sm font-bold text-white transition hover:scale-105 hover:bg-[#a855f7]">
-                                {{ $userRating ? 'Update Rating' : 'Rate' }}
-                            </button>
-                        </form>
+                                </form>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="mt-4 rounded-2xl border border-[#7a669f]/25 bg-[#2f2543] p-5">
-                        <form method="POST" action="{{ route('movies.reviews.store', $movie) }}">
+                        <form
+                            id="reviewForm"
+                            method="POST"
+                            action="{{ route('movies.reviews.store', $movie) }}"
+                        >
                             @csrf
-                            <textarea name="review_text" rows="4" required placeholder="Leave a comment..." class="w-full resize-none rounded-xl border border-transparent bg-transparent px-0 text-sm leading-7 text-white placeholder:text-[#a9a2b8] focus:border-transparent focus:outline-none focus:ring-0">{{ old('review_text', $userReview?->review_text ?? '') }}</textarea>
-                            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#7a669f]/25 pt-4">
-                                <span class="text-xs text-[#a9a2b8]">{{ $userReview ? 'Editing your review' : 'Writing a new review' }}</span>
-                                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#7a669f] px-5 py-2 text-sm font-bold text-white transition hover:scale-105 hover:bg-[#a855f7]">
+
+                            <textarea
+                                name="review_text"
+                                rows="4"
+                                required
+                                placeholder="Leave a comment..."
+                                class="w-full resize-none rounded-xl border border-transparent bg-transparent px-0 text-sm leading-7 text-white placeholder:text-[#a9a2b8] focus:border-transparent focus:outline-none focus:ring-0"
+                            >{{ old('review_text', $userReview?->review_text ?? '') }}</textarea>
+                        </form>
+
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#7a669f]/25 pt-4">
+                            <span class="text-xs text-[#a9a2b8]">
+                                {{ $userReview ? 'Editing your review' : 'Writing a new review' }}
+                            </span>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                @if ($userReview)
+                                    <form
+                                        method="POST"
+                                        action="{{ route('movies.reviews.destroy', $movie) }}"
+                                        onsubmit="return confirm('Hapus review kamu?')"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button
+                                            type="submit"
+                                            class="inline-flex items-center gap-2 rounded-lg border border-red-300/40 px-4 py-2 text-sm font-bold text-red-100 transition hover:bg-red-500/20"
+                                        >
+                                            <i class="bi bi-trash"></i>
+                                            Hapus Review
+                                        </button>
+                                    </form>
+                                @endif
+
+                                <button
+                                    type="submit"
+                                    form="reviewForm"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-[#7a669f] px-5 py-2 text-sm font-bold text-white transition hover:scale-105 hover:bg-[#a855f7]"
+                                >
                                     <i class="bi bi-send-fill"></i>
                                     {{ $userReview ? 'Update Review' : 'Post Review' }}
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 @else
                     <div class="rounded-2xl border border-[#7a669f]/25 bg-[#2f2543] p-5 text-sm text-[#a9a2b8]">

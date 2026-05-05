@@ -50,6 +50,8 @@ class WatchlistController extends Controller
     // Metode untuk menghapus film dari watchlist pengguna.
     public function destroy(Request $request, Movie $movie): RedirectResponse
     {
+        
+
         Watchlist::query()
             ->forUser((int) $request->user()->id)
             ->forMovie((int) $movie->id)
