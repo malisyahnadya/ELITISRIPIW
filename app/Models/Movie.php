@@ -69,6 +69,16 @@ class Movie extends Model
         return $this->hasMany(Watchlist::class);
     }
 
+    // Accessor status watchlist bila relasi sudah di-preload.
+    public function getWatchlistStatusAttribute(): ?string
+    {
+        if (!$this->relationLoaded('watchlists')) {
+            return null;
+        }
+
+        return $this->watchlists->first()?->status;
+    }
+
     // Accessor untuk mendapatkan rata-rata skor rating, dengan optimisasi jika sudah di-preload
     public function getAverageScoreAttribute(): float
     {
@@ -168,6 +178,22 @@ class Movie extends Model
                 'release_year',
             ])
             ->withRatingsStats();
+    }
+
+    // Scope untuk preload watchlist per user agar status bisa ditampilkan tanpa query tambahan.
+    public function scopeWithWatchlistForUser(Builder $query, ?int $userId): Builder
+    {
+        if (!$userId) {
+            return $query;
+        }
+
+        return $query->with([
+            'watchlists' => function ($watchlistQuery) use ($userId) {
+                $watchlistQuery
+                    ->where('user_id', $userId)
+                    ->select('id', 'user_id', 'movie_id', 'status');
+            },
+        ]);
     }
 
     // Scope untuk filter berdasarkan genre, tahun rilis, dan skor minimum

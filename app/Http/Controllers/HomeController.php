@@ -50,15 +50,7 @@ class HomeController extends Controller
         $recommendedMovies = Movie::query()
             ->forHomeCard()
             ->withCount('reviews')
-            ->when(Auth::check(), function ($query) {
-            $query->with([
-                'watchlists' => function ($watchlistQuery) {
-                $watchlistQuery
-                    ->where('user_id', Auth::id())
-                    ->select('id', 'user_id', 'movie_id', 'status');
-                },
-            ]);
-            })
+            ->withWatchlistForUser(Auth::id())
             ->orderByRaw('(ratings_count + reviews_count) DESC')
             ->orderByDesc('ratings_avg_score')
             ->take(12)
@@ -72,12 +64,14 @@ class HomeController extends Controller
         if (Auth::check()) {
             $userWatchlist = Watchlist::query()
                 ->forUser((int) Auth::id())
-                ->with(['movie' => fn ($query) => $query->forHomeCard()])
+                ->withMovieCard()
                 ->latest('updated_at')
                 ->take(10)
                 ->get();
 
-            $hasMoreWatchlist = Watchlist::where('user_id', Auth::id())->count() > 10;
+            $hasMoreWatchlist = Watchlist::query()
+                ->forUser((int) Auth::id())
+                ->count() > 10;
         }
 
         $latestReviews = Review::query()
