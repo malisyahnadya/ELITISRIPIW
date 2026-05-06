@@ -14,7 +14,7 @@
 
             <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <h1 class="text-center text-sm font-extrabold uppercase tracking-[0.22em] text-white sm:text-base">
-                    Top 5 Movies of {{ $monthName }}
+                    Top {{ $heroMovies->count() }} Movies of {{ $monthName }}
                 </h1>
 
                 @if ($heroMovies->isNotEmpty())
