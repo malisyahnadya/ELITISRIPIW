@@ -223,20 +223,41 @@
                         </div>
                         @php
                             $likedByCurrentUser = (bool) ($review->liked_by_current_user ?? false);
+                            $reportedByCurrentUser = (bool) ($review->reported_by_current_user ?? false);
+                            $isOwnReview = auth()->check() && (int) $review->user_id === (int) auth()->id();
                         @endphp
 
                         @auth
-                            <form method="POST" action="{{ route('reviews.like.toggle', $review) }}">
-                                @csrf
-                                <button
-                                    type="submit"
-                                    class="rounded-full px-3 py-1 text-xs font-semibold transition {{ $likedByCurrentUser ? 'bg-pink-500/20 text-pink-200' : 'text-[#a9a2b8] hover:bg-white/10 hover:text-white' }}"
-                                    aria-label="{{ $likedByCurrentUser ? 'Unlike review' : 'Like review' }}"
-                                >
-                                    <i class="bi {{ $likedByCurrentUser ? 'bi-heart-fill' : 'bi-heart' }}"></i>
-                                    {{ $review->likes_count ?? 0 }}
-                                </button>
-                            </form>
+                            <div class="flex items-center gap-2">
+                                <form method="POST" action="{{ route('reviews.like.toggle', $review) }}">
+                                    @csrf
+                                    <button
+                                        type="submit"
+                                        class="rounded-full px-3 py-1 text-xs font-semibold transition {{ $likedByCurrentUser ? 'bg-pink-500/20 text-pink-200' : 'text-[#a9a2b8] hover:bg-white/10 hover:text-white' }}"
+                                        aria-label="{{ $likedByCurrentUser ? 'Unlike review' : 'Like review' }}"
+                                    >
+                                        <i class="bi {{ $likedByCurrentUser ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                                        {{ $review->likes_count ?? 0 }}
+                                    </button>
+                                </form>
+
+                                @if (! $isOwnReview)
+                                    @if ($reportedByCurrentUser)
+                                        <span class="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-200">Reported</span>
+                                    @else
+                                        <form method="POST" action="{{ route('reviews.report', $review) }}" onsubmit="return confirm('Laporkan review ini?')">
+                                            @csrf
+                                            <button
+                                                type="submit"
+                                                class="rounded-full px-3 py-1 text-xs font-semibold text-[#a9a2b8] transition hover:bg-white/10 hover:text-white"
+                                                aria-label="Report review"
+                                            >
+                                                <i class="bi bi-flag"></i> Report
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endif
+                            </div>
                         @else
                             <a
                                 href="{{ route('login') }}"
