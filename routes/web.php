@@ -6,12 +6,14 @@ use App\Http\Controllers\Admin\DirectorController as AdminDirectorController;
 use App\Http\Controllers\Admin\GenreController as AdminGenreController;
 use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\ReviewReportController as AdminReviewReportController;
 use App\Http\Controllers\Admin\TmdbImportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewLikeController;
+use App\Http\Controllers\ReviewReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/movies/{movie}/ratings', [MovieController::class, 'destroyRating'])->name('movies.ratings.destroy');
     Route::delete('/movies/{movie}/reviews', [MovieController::class, 'destroyReview'])->name('movies.reviews.destroy');
     Route::post('/reviews/{review}/like', [ReviewLikeController::class, 'toggle'])->name('reviews.like.toggle');
+    Route::post('/reviews/{review}/report', [ReviewReportController::class, 'store'])->name('reviews.report');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -57,6 +60,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('reviews', AdminReviewController::class)
             ->only(['index', 'destroy'])
             ->names('admin.reviews');
+        Route::resource('review-reports', AdminReviewReportController::class)
+            ->only(['index', 'destroy'])
+            ->names('admin.review-reports');
     });
 });
 

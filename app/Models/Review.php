@@ -43,6 +43,12 @@ class Review extends Model
         return $this->hasMany(ReviewLike::class);
     }
 
+    // Relasi report yang masuk ke review ini (1 review bisa punya banyak report).
+    public function reports(): HasMany
+    {
+        return $this->hasMany(ReviewReport::class);
+    }
+
     // Relasi many-to-many untuk daftar user yang me-like review ini.
     public function likedByUsers(): BelongsToMany
     {

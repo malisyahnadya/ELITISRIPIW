@@ -67,6 +67,9 @@ class MovieController extends Controller
                             'likes as liked_by_current_user' => function ($likeQuery) {
                                 $likeQuery->where('user_id', auth()->id());
                             },
+                            'reports as reported_by_current_user' => function ($reportQuery) {
+                                $reportQuery->where('user_id', auth()->id());
+                            },
                         ]);
                     })
                     ->latestFirst();
@@ -192,6 +195,9 @@ class MovieController extends Controller
         // Kalau relasi likes tidak memakai cascade delete di migration,
         // hapus like review terlebih dahulu supaya tidak error foreign key.
         $review->likes()->delete();
+
+        // Hapus report review bila ada supaya konsisten dengan penghapusan review.
+        $review->reports()->delete();
 
         // Hapus review dari database.
         $review->delete();

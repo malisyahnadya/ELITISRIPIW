@@ -84,6 +84,11 @@ class User extends Authenticatable
         return $this->hasMany(ReviewLike::class);
     }
 
+    public function reviewReports(): HasMany
+    {
+        return $this->hasMany(ReviewReport::class);
+    }
+
     // Relasi many-to-many untuk daftar film yang ada di watchlist user, termasuk statusnya
     public function watchedMovies(): BelongsToMany
     {

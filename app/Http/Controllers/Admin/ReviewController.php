@@ -30,6 +30,7 @@ class ReviewController extends Controller
     public function destroy(Review $review): RedirectResponse
     {
         $review->likes()->delete();
+        $review->reports()->delete();
         $review->delete();
 
         return redirect()->route('admin.reviews.index')
